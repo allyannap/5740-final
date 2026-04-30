@@ -42,7 +42,7 @@ Start R (see above), then run:
 
 ```r
 install.packages(
-  c("knitr", "rmarkdown", "tidyverse"),
+  c("knitr", "rmarkdown", "tidyverse", "dplyr", "readr"),
   repos = "https://cloud.r-project.org"
 )
 ```
@@ -50,7 +50,7 @@ install.packages(
 Or from the shell without entering R:
 
 ```bash
-Rscript -e 'install.packages(c("knitr", "rmarkdown", "tidyverse"), repos = "https://cloud.r-project.org")'
+Rscript -e 'install.packages(c("knitr", "rmarkdown", "tidyverse", "dplyr", "readr"), repos = "https://cloud.r-project.org")'
 ```
 
 ### Render the report

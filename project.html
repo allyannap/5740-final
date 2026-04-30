@@ -127,6 +127,559 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 ✖ dplyr::lag()    masks stats::lag()
 ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
 </div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>diabetic <span class="ot">=</span> <span class="fu">read.csv</span>(<span class="st">"data/diabetic_data.csv"</span>, <span class="at">na=</span><span class="fu">c</span>(<span class="st">"?"</span>,<span class="st">"NA"</span>))</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(diabetic)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  encounter_id patient_nbr            race gender     age weight
+1      2278392     8222157       Caucasian Female  [0-10)   &lt;NA&gt;
+2       149190    55629189       Caucasian Female [10-20)   &lt;NA&gt;
+3        64410    86047875 AfricanAmerican Female [20-30)   &lt;NA&gt;
+4       500364    82442376       Caucasian   Male [30-40)   &lt;NA&gt;
+5        16680    42519267       Caucasian   Male [40-50)   &lt;NA&gt;
+6        35754    82637451       Caucasian   Male [50-60)   &lt;NA&gt;
+  admission_type_id discharge_disposition_id admission_source_id
+1                 6                       25                   1
+2                 1                        1                   7
+3                 1                        1                   7
+4                 1                        1                   7
+5                 1                        1                   7
+6                 2                        1                   2
+  time_in_hospital payer_code        medical_specialty num_lab_procedures
+1                1       &lt;NA&gt; Pediatrics-Endocrinology                 41
+2                3       &lt;NA&gt;                     &lt;NA&gt;                 59
+3                2       &lt;NA&gt;                     &lt;NA&gt;                 11
+4                2       &lt;NA&gt;                     &lt;NA&gt;                 44
+5                1       &lt;NA&gt;                     &lt;NA&gt;                 51
+6                3       &lt;NA&gt;                     &lt;NA&gt;                 31
+  num_procedures num_medications number_outpatient number_emergency
+1              0               1                 0                0
+2              0              18                 0                0
+3              5              13                 2                0
+4              1              16                 0                0
+5              0               8                 0                0
+6              6              16                 0                0
+  number_inpatient diag_1 diag_2 diag_3 number_diagnoses max_glu_serum
+1                0 250.83   &lt;NA&gt;   &lt;NA&gt;                1          None
+2                0    276 250.01    255                9          None
+3                1    648    250    V27                6          None
+4                0      8 250.43    403                7          None
+5                0    197    157    250                5          None
+6                0    414    411    250                9          None
+  A1Cresult metformin repaglinide nateglinide chlorpropamide glimepiride
+1      None        No          No          No             No          No
+2      None        No          No          No             No          No
+3      None        No          No          No             No          No
+4      None        No          No          No             No          No
+5      None        No          No          No             No          No
+6      None        No          No          No             No          No
+  acetohexamide glipizide glyburide tolbutamide pioglitazone rosiglitazone
+1            No        No        No          No           No            No
+2            No        No        No          No           No            No
+3            No    Steady        No          No           No            No
+4            No        No        No          No           No            No
+5            No    Steady        No          No           No            No
+6            No        No        No          No           No            No
+  acarbose miglitol troglitazone tolazamide examide citoglipton insulin
+1       No       No           No         No      No          No      No
+2       No       No           No         No      No          No      Up
+3       No       No           No         No      No          No      No
+4       No       No           No         No      No          No      Up
+5       No       No           No         No      No          No  Steady
+6       No       No           No         No      No          No  Steady
+  glyburide.metformin glipizide.metformin glimepiride.pioglitazone
+1                  No                  No                       No
+2                  No                  No                       No
+3                  No                  No                       No
+4                  No                  No                       No
+5                  No                  No                       No
+6                  No                  No                       No
+  metformin.rosiglitazone metformin.pioglitazone change diabetesMed readmitted
+1                      No                     No     No          No         NO
+2                      No                     No     Ch         Yes        &gt;30
+3                      No                     No     No         Yes         NO
+4                      No                     No     Ch         Yes         NO
+5                      No                     No     Ch         Yes         NO
+6                      No                     No     No         Yes        &gt;30</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>mapping <span class="ot">=</span> <span class="fu">read.csv</span>(<span class="st">"data/IDS_mapping.csv"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(mapping)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  admission_type_id   description
+1                 1     Emergency
+2                 2        Urgent
+3                 3      Elective
+4                 4       Newborn
+5                 5 Not Available
+6                 6          NULL</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># remove high-missing &amp; irrelevant columns</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic <span class="sc">%&gt;%</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">any_of</span>(<span class="fu">c</span>(<span class="st">"weight"</span>, <span class="st">"payer_code"</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">medical_specialty =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(medical_specialty), <span class="st">"Missing"</span>, medical_specialty),</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">race =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(race), <span class="st">"Missing"</span>, race)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(diabetic_clean)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  encounter_id patient_nbr            race gender     age admission_type_id
+1      2278392     8222157       Caucasian Female  [0-10)                 6
+2       149190    55629189       Caucasian Female [10-20)                 1
+3        64410    86047875 AfricanAmerican Female [20-30)                 1
+4       500364    82442376       Caucasian   Male [30-40)                 1
+5        16680    42519267       Caucasian   Male [40-50)                 1
+6        35754    82637451       Caucasian   Male [50-60)                 2
+  discharge_disposition_id admission_source_id time_in_hospital
+1                       25                   1                1
+2                        1                   7                3
+3                        1                   7                2
+4                        1                   7                2
+5                        1                   7                1
+6                        1                   2                3
+         medical_specialty num_lab_procedures num_procedures num_medications
+1 Pediatrics-Endocrinology                 41              0               1
+2                  Missing                 59              0              18
+3                  Missing                 11              5              13
+4                  Missing                 44              1              16
+5                  Missing                 51              0               8
+6                  Missing                 31              6              16
+  number_outpatient number_emergency number_inpatient diag_1 diag_2 diag_3
+1                 0                0                0 250.83   &lt;NA&gt;   &lt;NA&gt;
+2                 0                0                0    276 250.01    255
+3                 2                0                1    648    250    V27
+4                 0                0                0      8 250.43    403
+5                 0                0                0    197    157    250
+6                 0                0                0    414    411    250
+  number_diagnoses max_glu_serum A1Cresult metformin repaglinide nateglinide
+1                1          None      None        No          No          No
+2                9          None      None        No          No          No
+3                6          None      None        No          No          No
+4                7          None      None        No          No          No
+5                5          None      None        No          No          No
+6                9          None      None        No          No          No
+  chlorpropamide glimepiride acetohexamide glipizide glyburide tolbutamide
+1             No          No            No        No        No          No
+2             No          No            No        No        No          No
+3             No          No            No    Steady        No          No
+4             No          No            No        No        No          No
+5             No          No            No    Steady        No          No
+6             No          No            No        No        No          No
+  pioglitazone rosiglitazone acarbose miglitol troglitazone tolazamide examide
+1           No            No       No       No           No         No      No
+2           No            No       No       No           No         No      No
+3           No            No       No       No           No         No      No
+4           No            No       No       No           No         No      No
+5           No            No       No       No           No         No      No
+6           No            No       No       No           No         No      No
+  citoglipton insulin glyburide.metformin glipizide.metformin
+1          No      No                  No                  No
+2          No      Up                  No                  No
+3          No      No                  No                  No
+4          No      Up                  No                  No
+5          No  Steady                  No                  No
+6          No  Steady                  No                  No
+  glimepiride.pioglitazone metformin.rosiglitazone metformin.pioglitazone
+1                       No                      No                     No
+2                       No                      No                     No
+3                       No                      No                     No
+4                       No                      No                     No
+5                       No                      No                     No
+6                       No                      No                     No
+  change diabetesMed readmitted
+1     No          No         NO
+2     Ch         Yes        &gt;30
+3     No         Yes         NO
+4     Ch         Yes         NO
+5     Ch         Yes         NO
+6     No         Yes        &gt;30</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># keep only first encounter per patient</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(patient_nbr, encounter_id) <span class="sc">%&gt;%</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(patient_nbr, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"after keeping first encounter per patient:"</span>, <span class="fu">dim</span>(diabetic_clean), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>after keeping first encounter per patient: 71518 48 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># remove death/hospice discharges</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>death_hospice_ids <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">11</span>, <span class="dv">13</span>, <span class="dv">14</span>, <span class="dv">19</span>, <span class="dv">20</span>, <span class="dv">21</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>discharge_disposition_id <span class="sc">%in%</span> death_hospice_ids)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"after removing death/hospice:"</span>, <span class="fu">dim</span>(diabetic_clean), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>after removing death/hospice: 69973 48 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># check whether an ICD-9 diagnosis code indicates diabetes</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>is_diabetes_dx <span class="ot">&lt;-</span> <span class="cf">function</span>(code) {</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  code <span class="ot">&lt;-</span> <span class="fu">as.character</span>(code)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">is.na</span>(code),</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="cn">FALSE</span>,</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">startsWith</span>(code,<span class="st">"250"</span>)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># paper keeps stays between 1 and 14 days</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    time_in_hospital <span class="sc">&gt;=</span> <span class="dv">1</span>,</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    time_in_hospital <span class="sc">&lt;=</span> <span class="dv">14</span>,</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># paper requires lab tests during the encounter</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    num_lab_procedures <span class="sc">&gt;</span> <span class="dv">0</span>,</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># paper requires medications during the encounter</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    num_medications <span class="sc">&gt;</span> <span class="dv">0</span>,</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># paper keeps diabetic encounters:</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># diabetes appears in any diagnosis field</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">is_diabetes_dx</span>(diag_1) <span class="sc">|</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is_diabetes_dx</span>(diag_2) <span class="sc">|</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is_diabetes_dx</span>(diag_3)</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># creating binary readmission outcome</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">readmitted_binary =</span> <span class="fu">ifelse</span>(readmitted <span class="sc">==</span> <span class="st">"&lt;30"</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co"># create HbA1c group</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co"># HbA1c = a blood test measuring average blood sugar over ~3 months</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="co"># paper has:</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co"># no HbA1c test</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="co"># normal result</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="co"># high result and medication changed</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="co"># high result and medication not changed</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">hba1c_group =</span> <span class="fu">case_when</span>(</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>      A1Cresult <span class="sc">==</span> <span class="st">"None"</span><span class="sc">~</span><span class="st">"No test"</span>,</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>      A1Cresult <span class="sc">==</span> <span class="st">"Norm"</span><span class="sc">~</span><span class="st">"Normal"</span>,</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>      A1Cresult <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"&gt;7"</span>,<span class="st">"&gt;8"</span>) <span class="sc">&amp;</span> change <span class="sc">==</span> <span class="st">"Ch"</span><span class="sc">~</span><span class="st">"High, medication changed"</span>,</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>      A1Cresult <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"&gt;7"</span>,<span class="st">"&gt;8"</span>) <span class="sc">&amp;</span> change <span class="sc">==</span> <span class="st">"No"</span><span class="sc">~</span><span class="st">"High, medication not changed"</span>,</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(diabetic_clean)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  encounter_id patient_nbr            race gender     age admission_type_id
+1     29758806         378       Caucasian Female [50-60)                 3
+2     14824206         927 AfricanAmerican Female [30-40)                 1
+3      8380170        1152 AfricanAmerican Female [50-60)                 1
+4     66197028        1305       Caucasian Female [60-70)                 3
+5     85907514        4302       Caucasian Female [70-80)                 3
+6     12979032        5337       Caucasian   Male [70-80)                 3
+  discharge_disposition_id admission_source_id time_in_hospital
+1                        1                   1                2
+2                        1                   7                5
+3                        1                   7                6
+4                        1                   1                9
+5                        1                   1                1
+6                        5                   1                7
+           medical_specialty num_lab_procedures num_procedures num_medications
+1              Surgery-Neuro                 49              1              11
+2           InternalMedicine                 49              0               5
+3        Hematology/Oncology                 43              2              13
+4           InternalMedicine                 52              1              16
+5 Orthopedics-Reconstructive                 31              1               9
+6                 Cardiology                 27              3              16
+  number_outpatient number_emergency number_inpatient diag_1 diag_2 diag_3
+1                 0                0                0    722    305    250
+2                 0                0                0    590    220    250
+3                 0                0                1    282 250.01   &lt;NA&gt;
+4                 0                0                0    491    428 250.01
+5                 0                0                0    722 250.01    412
+6                 0                0                0    434    342    250
+  number_diagnoses max_glu_serum A1Cresult metformin repaglinide nateglinide
+1                3          None      None        No          No          No
+2                3          None      None        No          No          No
+3                2          None      None        No          No          No
+4                9          None      None        No          No          No
+5                7          None      None        No          No          No
+6                9          None        &gt;8        No          No          No
+  chlorpropamide glimepiride acetohexamide glipizide glyburide tolbutamide
+1             No          No            No        No        No          No
+2             No      Steady            No        No        No          No
+3             No          No            No        No        No          No
+4             No          No            No        No        No          No
+5             No          No            No        No        No          No
+6             No          No            No        Up    Steady          No
+  pioglitazone rosiglitazone acarbose miglitol troglitazone tolazamide examide
+1           No            No       No       No           No         No      No
+2           No            No       No       No           No         No      No
+3           No            No       No       No           No         No      No
+4           No            No       No       No           No         No      No
+5           No            No       No       No           No         No      No
+6           No            No       Up       No           No         No      No
+  citoglipton insulin glyburide.metformin glipizide.metformin
+1          No      No                  No                  No
+2          No      No                  No                  No
+3          No  Steady                  No                  No
+4          No  Steady                  No                  No
+5          No      No                  No                  No
+6          No  Steady                  No                  No
+  glimepiride.pioglitazone metformin.rosiglitazone metformin.pioglitazone
+1                       No                      No                     No
+2                       No                      No                     No
+3                       No                      No                     No
+4                       No                      No                     No
+5                       No                      No                     No
+6                       No                      No                     No
+  change diabetesMed readmitted readmitted_binary              hba1c_group
+1     No          No         NO                 0                  No test
+2     No         Yes         NO                 0                  No test
+3     No         Yes        &gt;30                 0                  No test
+4     No         Yes         NO                 0                  No test
+5     No          No         NO                 0                  No test
+6     Ch         Yes        &gt;30                 0 High, medication changed</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># recoding age into age groups specified in paper</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">age_group_paper =</span> <span class="fu">case_when</span>(</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>      age <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"[0-10)"</span>, <span class="st">"[10-20)"</span>, <span class="st">"[20-30)"</span>) <span class="sc">~</span> <span class="st">"&lt;=30"</span>,</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>      age <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"[30-40)"</span>, <span class="st">"[40-50)"</span>, <span class="st">"[50-60)"</span>) <span class="sc">~</span> <span class="st">"30-60"</span>,</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>      age <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"[60-70)"</span>, <span class="st">"[70-80)"</span>, <span class="st">"[80-90)"</span>, <span class="st">"[90-100)"</span>) <span class="sc">~</span> <span class="st">"&gt;60"</span>,</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="co"># recoding primary diagnosis (encoded) into 8 meaningful groups</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>diag_category <span class="ot">&lt;-</span> <span class="cf">function</span>(code) {</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.na</span>(code)) {</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Other"</span>)</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>  code <span class="ot">&lt;-</span> <span class="fu">as.character</span>(code)</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">startsWith</span>(code, <span class="st">"V"</span>) <span class="sc">||</span> <span class="fu">startsWith</span>(code, <span class="st">"E"</span>)) {</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Other"</span>)</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>  num <span class="ot">&lt;-</span> <span class="fu">suppressWarnings</span>(<span class="fu">as.numeric</span>(code))</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.na</span>(num)) {</span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Other"</span>)</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> ((num<span class="sc">&gt;=</span><span class="dv">390</span> <span class="sc">&amp;</span> num<span class="sc">&lt;=</span><span class="dv">459</span>) <span class="sc">|</span> num<span class="sc">==</span><span class="dv">785</span>) {</span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Circulatory"</span>)</span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> ((num<span class="sc">&gt;=</span><span class="dv">460</span> <span class="sc">&amp;</span> num<span class="sc">&lt;=</span><span class="dv">519</span>) <span class="sc">|</span> num<span class="sc">==</span><span class="dv">786</span>) {</span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Respiratory"</span>)</span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> ((num<span class="sc">&gt;=</span><span class="dv">520</span> <span class="sc">&amp;</span> num<span class="sc">&lt;=</span><span class="dv">579</span>) <span class="sc">|</span> num<span class="sc">==</span><span class="dv">787</span>) {</span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Digestive"</span>)</span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">floor</span>(num)<span class="sc">==</span><span class="dv">250</span>) {</span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Diabetes"</span>)</span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (num<span class="sc">&gt;=</span><span class="dv">800</span> <span class="sc">&amp;</span> num<span class="sc">&lt;=</span><span class="dv">999</span>) {</span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Injury"</span>)</span>
+<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (num<span class="sc">&gt;=</span><span class="dv">710</span> <span class="sc">&amp;</span> num<span class="sc">&lt;=</span><span class="dv">739</span>) {</span>
+<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Musculoskeletal"</span>)</span>
+<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> ((num<span class="sc">&gt;=</span><span class="dv">580</span> <span class="sc">&amp;</span> num<span class="sc">&lt;=</span><span class="dv">629</span>) <span class="sc">|</span> num<span class="sc">==</span><span class="dv">788</span>) {</span>
+<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Genitourinary"</span>)</span>
+<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (num<span class="sc">&gt;=</span><span class="dv">140</span> <span class="sc">&amp;</span> num<span class="sc">&lt;=</span><span class="dv">239</span>) {</span>
+<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Neoplasms"</span>)</span>
+<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Other"</span>)</span>
+<span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb17-43"><a href="#cb17-43" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-44"><a href="#cb17-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-45"><a href="#cb17-45" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
+<span id="cb17-46"><a href="#cb17-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb17-47"><a href="#cb17-47" aria-hidden="true" tabindex="-1"></a>    <span class="at">primary_diagnosis_group =</span> <span class="fu">sapply</span>(diag_1, diag_category)</span>
+<span id="cb17-48"><a href="#cb17-48" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb17-49"><a href="#cb17-49" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(diabetic_clean)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  encounter_id patient_nbr            race gender     age admission_type_id
+1     29758806         378       Caucasian Female [50-60)                 3
+2     14824206         927 AfricanAmerican Female [30-40)                 1
+3      8380170        1152 AfricanAmerican Female [50-60)                 1
+4     66197028        1305       Caucasian Female [60-70)                 3
+5     85907514        4302       Caucasian Female [70-80)                 3
+6     12979032        5337       Caucasian   Male [70-80)                 3
+  discharge_disposition_id admission_source_id time_in_hospital
+1                        1                   1                2
+2                        1                   7                5
+3                        1                   7                6
+4                        1                   1                9
+5                        1                   1                1
+6                        5                   1                7
+           medical_specialty num_lab_procedures num_procedures num_medications
+1              Surgery-Neuro                 49              1              11
+2           InternalMedicine                 49              0               5
+3        Hematology/Oncology                 43              2              13
+4           InternalMedicine                 52              1              16
+5 Orthopedics-Reconstructive                 31              1               9
+6                 Cardiology                 27              3              16
+  number_outpatient number_emergency number_inpatient diag_1 diag_2 diag_3
+1                 0                0                0    722    305    250
+2                 0                0                0    590    220    250
+3                 0                0                1    282 250.01   &lt;NA&gt;
+4                 0                0                0    491    428 250.01
+5                 0                0                0    722 250.01    412
+6                 0                0                0    434    342    250
+  number_diagnoses max_glu_serum A1Cresult metformin repaglinide nateglinide
+1                3          None      None        No          No          No
+2                3          None      None        No          No          No
+3                2          None      None        No          No          No
+4                9          None      None        No          No          No
+5                7          None      None        No          No          No
+6                9          None        &gt;8        No          No          No
+  chlorpropamide glimepiride acetohexamide glipizide glyburide tolbutamide
+1             No          No            No        No        No          No
+2             No      Steady            No        No        No          No
+3             No          No            No        No        No          No
+4             No          No            No        No        No          No
+5             No          No            No        No        No          No
+6             No          No            No        Up    Steady          No
+  pioglitazone rosiglitazone acarbose miglitol troglitazone tolazamide examide
+1           No            No       No       No           No         No      No
+2           No            No       No       No           No         No      No
+3           No            No       No       No           No         No      No
+4           No            No       No       No           No         No      No
+5           No            No       No       No           No         No      No
+6           No            No       Up       No           No         No      No
+  citoglipton insulin glyburide.metformin glipizide.metformin
+1          No      No                  No                  No
+2          No      No                  No                  No
+3          No  Steady                  No                  No
+4          No  Steady                  No                  No
+5          No      No                  No                  No
+6          No  Steady                  No                  No
+  glimepiride.pioglitazone metformin.rosiglitazone metformin.pioglitazone
+1                       No                      No                     No
+2                       No                      No                     No
+3                       No                      No                     No
+4                       No                      No                     No
+5                       No                      No                     No
+6                       No                      No                     No
+  change diabetesMed readmitted readmitted_binary              hba1c_group
+1     No          No         NO                 0                  No test
+2     No         Yes         NO                 0                  No test
+3     No         Yes        &gt;30                 0                  No test
+4     No         Yes         NO                 0                  No test
+5     No          No         NO                 0                  No test
+6     Ch         Yes        &gt;30                 0 High, medication changed
+  age_group_paper primary_diagnosis_group
+1           30-60         Musculoskeletal
+2           30-60           Genitourinary
+3           30-60                   Other
+4             &gt;60             Respiratory
+5             &gt;60         Musculoskeletal
+6             &gt;60             Circulatory</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># recoding admission source</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">admission_source_group =</span> <span class="fu">case_when</span>(</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>      admission_source_id <span class="sc">==</span> <span class="dv">7</span> <span class="sc">~</span> <span class="st">"Emergency room"</span>,</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>      admission_source_id <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">"Physician/clinic referral"</span>,</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"Otherwise"</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="co"># recoding discharge disposition</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">discharge_home =</span> <span class="fu">ifelse</span>(</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>      discharge_disposition_id<span class="sc">==</span><span class="dv">1</span>,</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Discharged to home"</span>,</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Otherwise"</span></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a><span class="co"># recoding medical specialty into main groups</span></span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>surgery_specialties <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-General"</span>,</span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Cardiovascular/Thoracic"</span>,</span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Neuro"</span>,</span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Vascular"</span>,</span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Plastic"</span>,</span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Cardiovascular"</span>,</span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Thoracic"</span>,</span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Colon&amp;Rectal"</span>,</span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Pediatric"</span>,</span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Maxillofacial"</span></span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">medical_specialty_group =</span> <span class="fu">case_when</span>(</span>
+<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is.na</span>(medical_specialty) <span class="sc">|</span> medical_specialty <span class="sc">==</span> <span class="st">"Missing"</span> <span class="sc">~</span> <span class="st">"Missing or unknown"</span>,</span>
+<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a>      medical_specialty <span class="sc">==</span> <span class="st">"InternalMedicine"</span> <span class="sc">~</span> <span class="st">"Internal Medicine"</span>,</span>
+<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a>      medical_specialty <span class="sc">==</span> <span class="st">"Cardiology"</span> <span class="sc">~</span> <span class="st">"Cardiology"</span>,</span>
+<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a>      medical_specialty <span class="sc">%in%</span> surgery_specialties <span class="sc">~</span> <span class="st">"Surgery"</span>,</span>
+<span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a>      medical_specialty <span class="sc">==</span> <span class="st">"Family/GeneralPractice"</span> <span class="sc">~</span> <span class="st">"Family/general practice"</span>,</span>
+<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"Other"</span></span>
+<span id="cb19-43"><a href="#cb19-43" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb19-44"><a href="#cb19-44" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># selecting final variables</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>final_cols <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"encounter_id"</span>,</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"patient_nbr"</span>,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"readmitted"</span>,</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"readmitted_binary"</span>,</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"hba1c_group"</span>,</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"gender"</span>,</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"age"</span>,</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">"age_group_paper"</span>,</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">"race"</span>,</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"admission_source_id"</span>,</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"admission_source_group"</span>,</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"discharge_disposition_id"</span>,</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"discharge_home"</span>,</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"diag_1"</span>,</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">"primary_diagnosis_group"</span>,</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>  <span class="st">"medical_specialty"</span>,</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>  <span class="st">"medical_specialty_group"</span>,</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>  <span class="st">"time_in_hospital"</span></span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">any_of</span>(final_cols))</span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"final shape:"</span>, <span class="fu">dim</span>(diabetic_clean), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>final shape: 27577 18 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(diabetic_clean)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  encounter_id patient_nbr readmitted readmitted_binary
+1     29758806         378         NO                 0
+2     14824206         927         NO                 0
+3      8380170        1152        &gt;30                 0
+4     66197028        1305         NO                 0
+5     85907514        4302         NO                 0
+6     12979032        5337        &gt;30                 0
+               hba1c_group gender     age age_group_paper            race
+1                  No test Female [50-60)           30-60       Caucasian
+2                  No test Female [30-40)           30-60 AfricanAmerican
+3                  No test Female [50-60)           30-60 AfricanAmerican
+4                  No test Female [60-70)             &gt;60       Caucasian
+5                  No test Female [70-80)             &gt;60       Caucasian
+6 High, medication changed   Male [70-80)             &gt;60       Caucasian
+  admission_source_id    admission_source_group discharge_disposition_id
+1                   1 Physician/clinic referral                        1
+2                   7            Emergency room                        1
+3                   7            Emergency room                        1
+4                   1 Physician/clinic referral                        1
+5                   1 Physician/clinic referral                        1
+6                   1 Physician/clinic referral                        5
+      discharge_home diag_1 primary_diagnosis_group          medical_specialty
+1 Discharged to home    722         Musculoskeletal              Surgery-Neuro
+2 Discharged to home    590           Genitourinary           InternalMedicine
+3 Discharged to home    282                   Other        Hematology/Oncology
+4 Discharged to home    491             Respiratory           InternalMedicine
+5 Discharged to home    722         Musculoskeletal Orthopedics-Reconstructive
+6          Otherwise    434             Circulatory                 Cardiology
+  medical_specialty_group time_in_hospital
+1                 Surgery                2
+2       Internal Medicine                5
+3                   Other                6
+4       Internal Medicine                9
+5                   Other                1
+6              Cardiology                7</code></pre>
+</div>
 </div>
 
 </main>

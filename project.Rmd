@@ -18,9 +18,218 @@ Group Members:
 library(knitr)
 library(rmarkdown)
 library(tidyverse)
+library(dplyr)
+library(readr)
 ```
 
 
 ```{r load data}
+diabetic = read.csv("data/diabetic_data.csv", na=c("?","NA"))
+head(diabetic)
+mapping = read.csv("data/IDS_mapping.csv")
+head(mapping)
+```
 
+
+```{r pre-processing from paper}
+# remove high-missing & irrelevant columns
+diabetic_clean <- diabetic %>%
+  select(-any_of(c("weight", "payer_code"))) %>%
+  mutate(
+    medical_specialty = ifelse(is.na(medical_specialty), "Missing", medical_specialty),
+    race = ifelse(is.na(race), "Missing", race)
+  )
+head(diabetic_clean)
+
+# keep only first encounter per patient
+diabetic_clean <- diabetic_clean %>%
+  arrange(patient_nbr, encounter_id) %>%
+  distinct(patient_nbr, .keep_all = TRUE)
+cat("after keeping first encounter per patient:", dim(diabetic_clean), "\n")
+
+# remove death/hospice discharges
+death_hospice_ids <- c(11, 13, 14, 19, 20, 21)
+diabetic_clean <- diabetic_clean %>%
+  filter(!discharge_disposition_id %in% death_hospice_ids)
+cat("after removing death/hospice:", dim(diabetic_clean), "\n")
+
+# check whether an ICD-9 diagnosis code indicates diabetes
+is_diabetes_dx <- function(code) {
+  code <- as.character(code)
+  ifelse(
+    is.na(code),
+    FALSE,
+    startsWith(code,"250")
+  )
+}
+
+diabetic_clean <- diabetic_clean %>%
+  filter(
+    # paper keeps stays between 1 and 14 days
+    time_in_hospital >= 1,
+    time_in_hospital <= 14,
+    # paper requires lab tests during the encounter
+    num_lab_procedures > 0,
+    # paper requires medications during the encounter
+    num_medications > 0,
+    # paper keeps diabetic encounters:
+    # diabetes appears in any diagnosis field
+    is_diabetes_dx(diag_1) |
+      is_diabetes_dx(diag_2) |
+      is_diabetes_dx(diag_3)
+  )
+```
+
+```{r pre-processing from paper2}
+# creating binary readmission outcome
+diabetic_clean <- diabetic_clean %>%
+  mutate(
+    readmitted_binary = ifelse(readmitted == "<30",1,0)
+  )
+
+# create HbA1c group
+# HbA1c = a blood test measuring average blood sugar over ~3 months
+# paper has:
+# no HbA1c test
+# normal result
+# high result and medication changed
+# high result and medication not changed
+diabetic_clean <- diabetic_clean %>%
+  mutate(
+    hba1c_group = case_when(
+      A1Cresult == "None"~"No test",
+      A1Cresult == "Norm"~"Normal",
+      A1Cresult %in% c(">7",">8") & change == "Ch"~"High, medication changed",
+      A1Cresult %in% c(">7",">8") & change == "No"~"High, medication not changed",
+      TRUE ~ NA_character_
+    )
+  )
+head(diabetic_clean)
+```
+
+```{r pre-processing from paper3: re-coding}
+# recoding age into age groups specified in paper
+diabetic_clean <- diabetic_clean %>%
+  mutate(
+    age_group_paper = case_when(
+      age %in% c("[0-10)", "[10-20)", "[20-30)") ~ "<=30",
+      age %in% c("[30-40)", "[40-50)", "[50-60)") ~ "30-60",
+      age %in% c("[60-70)", "[70-80)", "[80-90)", "[90-100)") ~ ">60",
+      TRUE ~ NA_character_
+    )
+  )
+
+# recoding primary diagnosis (encoded) into 8 meaningful groups
+diag_category <- function(code) {
+  if (is.na(code)) {
+    return("Other")
+  }
+  code <- as.character(code)
+  if (startsWith(code, "V") || startsWith(code, "E")) {
+    return("Other")
+  }
+  num <- suppressWarnings(as.numeric(code))
+  if (is.na(num)) {
+    return("Other")
+  } else if ((num>=390 & num<=459) | num==785) {
+    return("Circulatory")
+  } else if ((num>=460 & num<=519) | num==786) {
+    return("Respiratory")
+  } else if ((num>=520 & num<=579) | num==787) {
+    return("Digestive")
+  } else if (floor(num)==250) {
+    return("Diabetes")
+  } else if (num>=800 & num<=999) {
+    return("Injury")
+  } else if (num>=710 & num<=739) {
+    return("Musculoskeletal")
+  } else if ((num>=580 & num<=629) | num==788) {
+    return("Genitourinary")
+  } else if (num>=140 & num<=239) {
+    return("Neoplasms")
+  } else {
+    return("Other")
+  }
+}
+
+diabetic_clean <- diabetic_clean %>%
+  mutate(
+    primary_diagnosis_group = sapply(diag_1, diag_category)
+  )
+head(diabetic_clean)
+
+# recoding admission source
+diabetic_clean <- diabetic_clean %>%
+  mutate(
+    admission_source_group = case_when(
+      admission_source_id == 7 ~ "Emergency room",
+      admission_source_id == 1 ~ "Physician/clinic referral",
+      TRUE ~ "Otherwise"
+    )
+  )
+
+# recoding discharge disposition
+diabetic_clean <- diabetic_clean %>%
+  mutate(
+    discharge_home = ifelse(
+      discharge_disposition_id==1,
+      "Discharged to home",
+      "Otherwise"
+    )
+  )
+
+# recoding medical specialty into main groups
+surgery_specialties <- c(
+  "Surgery-General",
+  "Surgery-Cardiovascular/Thoracic",
+  "Surgery-Neuro",
+  "Surgery-Vascular",
+  "Surgery-Plastic",
+  "Surgery-Cardiovascular",
+  "Surgery-Thoracic",
+  "Surgery-Colon&Rectal",
+  "Surgery-Pediatric",
+  "Surgery-Maxillofacial"
+)
+diabetic_clean <- diabetic_clean %>%
+  mutate(
+    medical_specialty_group = case_when(
+      is.na(medical_specialty) | medical_specialty == "Missing" ~ "Missing or unknown",
+      medical_specialty == "InternalMedicine" ~ "Internal Medicine",
+      medical_specialty == "Cardiology" ~ "Cardiology",
+      medical_specialty %in% surgery_specialties ~ "Surgery",
+      medical_specialty == "Family/GeneralPractice" ~ "Family/general practice",
+      TRUE ~ "Other"
+    )
+  )
+```
+
+```{r pre-processing final}
+# selecting final variables
+final_cols <- c(
+  "encounter_id",
+  "patient_nbr",
+  "readmitted",
+  "readmitted_binary",
+  "hba1c_group",
+  "gender",
+  "age",
+  "age_group_paper",
+  "race",
+  "admission_source_id",
+  "admission_source_group",
+  "discharge_disposition_id",
+  "discharge_home",
+  "diag_1",
+  "primary_diagnosis_group",
+  "medical_specialty",
+  "medical_specialty_group",
+  "time_in_hospital"
+)
+
+diabetic_clean <- diabetic_clean %>%
+  select(any_of(final_cols))
+
+cat("final shape:", dim(diabetic_clean), "\n")
+head(diabetic_clean)
 ```
