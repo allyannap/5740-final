@@ -1,0 +1,26 @@
+---
+title: 3/5740 Final Project
+output: html_document
+---
+
+Group Members:
+
+- Alisa Castillo (alc297)
+- JP Eliopoulos (jae257)
+- Cole Garcia (cgg38)
+- Allyanna Panganiban (amp388)
+- Sarah ()
+
+
+```{r load packages}
+# be sure to have installed the necessary packages prior to running this cell 
+# (see `README.md`)
+library(knitr)
+library(rmarkdown)
+library(tidyverse)
+```
+
+
+```{r load data}
+
+```
