@@ -42,7 +42,7 @@ Start R (see above), then run:
 
 ```r
 install.packages(
-  c("knitr", "rmarkdown", "tidyverse", "dplyr", "readr", "caret", "pROC", "broom"),
+  c("knitr", "rmarkdown", "tidyverse", "dplyr", "readr", "caret", "pROC", "broom", "glmnet"),
   repos = "https://cloud.r-project.org"
 )
 ```
