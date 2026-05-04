@@ -12,7 +12,6 @@ Group Members:
 - Sarah Swee (sjs469)
 
 
-## Data Pre-processing
 ```{r load packages}
 # be sure to have installed the necessary packages prior to running this cell 
 # (see `README.md`)
@@ -21,9 +20,9 @@ library(rmarkdown)
 library(tidyverse)
 library(dplyr)
 library(readr)
+library(glmnet)
 library(caret)
 library(pROC)
-library(broom)
 ```
 
 
@@ -238,16 +237,15 @@ cat("final shape:", dim(diabetic_clean), "\n")
 head(diabetic_clean)
 ```
 
-## Modeling
+## LASSO/Ridge Regression
 
-### A. Logistic Regression
-
-```{r logistic}
-# preparing data for logistic -----------------------------------------------
-model_data <- diabetic_clean %>%
+```{r}
+# Use only cleaned/grouped predictors
+model_data <- diabetic_clean |>
   select(
     readmitted_binary,
     hba1c_group,
+    gender,
     age_group_paper,
     race,
     admission_source_group,
@@ -255,163 +253,163 @@ model_data <- diabetic_clean %>%
     primary_diagnosis_group,
     medical_specialty_group,
     time_in_hospital
-  ) %>%
-  mutate(
-    readmitted_binary = factor(
-      readmitted_binary,
-      levels = c(0, 1),
-      labels = c("Not_Readmitted", "Readmitted")
-    ),
-    across(
-      c(hba1c_group, age_group_paper, race, admission_source_group,
-        discharge_home, primary_diagnosis_group, medical_specialty_group),
-      as.factor
-    )
-  )
+  ) |>
+  drop_na()
 
-set.seed(123)
+# Make outcome numeric
+model_data$readmitted_binary <- as.numeric(model_data$readmitted_binary)
+```
+
+```{r}
+set.seed(1)
 
 train_index <- createDataPartition(
   model_data$readmitted_binary,
-  p = 0.70,
+  p = 0.7,
   list = FALSE
 )
 
 train_data <- model_data[train_index, ]
 test_data  <- model_data[-train_index, ]
+```
 
-# logistic regression model ------------------------------------------------
-logistic <- glm(
-  readmitted_binary ~ discharge_home +
-    race +
-    admission_source_group +
-    medical_specialty_group +
-    time_in_hospital +
-    age_group_paper +
-    primary_diagnosis_group,
-  data = train_data,
-  family = binomial
+```{r}
+# glmnet needs predictors as a matrix
+x_train <- model.matrix(readmitted_binary ~ ., data = train_data)[, -1]
+y_train <- train_data$readmitted_binary
+
+x_test <- model.matrix(readmitted_binary ~ ., data = test_data)[, -1]
+y_test <- test_data$readmitted_binary
+```
+
+```{r}
+set.seed(1)
+
+ridge_model <- cv.glmnet(
+  x = x_train,
+  y = y_train,
+  alpha = 0,
+  family = "binomial"
 )
-summary(logistic)
 
-# add HbA1c group
-hba1c_logistic <- glm(
-  readmitted_binary ~ discharge_home +
-    race +
-    admission_source_group +
-    medical_specialty_group +
-    time_in_hospital +
-    age_group_paper +
-    primary_diagnosis_group +
-    hba1c_group,
-  data = train_data,
-  family = binomial
-)
-summary(hba1c_logistic)
+best_lambda_ridge <- ridge_model$lambda.min
+best_lambda_ridge
 
-# compare core model vs HbA1c logistic ------------------------------------
-anova(logistic, hba1c_logistic, test = "Chisq")
-
-# interaction terms -------------------------------------------------------
-interaction_model <- glm(
-  readmitted_binary ~ discharge_home +
-    race +
-    admission_source_group +
-    medical_specialty_group +
-    time_in_hospital +
-    age_group_paper +
-    primary_diagnosis_group +
-    hba1c_group +
-    # interactions described in the paper
-    discharge_home:race +
-    discharge_home:medical_specialty_group +
-    discharge_home:primary_diagnosis_group +
-    discharge_home:time_in_hospital +
-    medical_specialty_group:time_in_hospital +
-    medical_specialty_group:age_group_paper +
-    primary_diagnosis_group:time_in_hospital +
-    primary_diagnosis_group:hba1c_group,
-  data = train_data,
-  family = binomial
-)
-summary(interaction_model)
-
-# Compare HbA1c model vs interaction model
-anova(hba1c_logistic, interaction_model, test = "Chisq")
-
-# prediction on test set ----------------------------------------------------
-test_data$prob_readmit <- predict(
-  interaction_model,
-  newdata = test_data,
+ridge_probs <- predict(
+  ridge_model,
+  s = best_lambda_ridge,
+  newx = x_test,
   type = "response"
 )
 
-# ROC / AUC ----------------------------------------------------------------
-roc_obj <- roc(
-  response = test_data$readmitted_binary,
-  predictor = test_data$prob_readmit,
-  levels = c("Not_Readmitted", "Readmitted")
-)
-
-auc(roc_obj)
-
-# choose threshold to prioritize recall/sensitivity, 70% sensitivity -------------------------
-all_thresholds <- coords(
-  roc_obj,
-  x = "all",
-  ret = c("threshold", "sensitivity", "specificity"),
-  transpose = FALSE
-)
-all_thresholds <- all_thresholds %>%
-  filter(!is.na(threshold)) %>%
-  mutate(diff_from_target = abs(sensitivity - 0.70)) %>%
-  arrange(diff_from_target)
-
-threshold_info <- all_thresholds[1, ]
-threshold_info
-threshold <- threshold_info$threshold
-threshold
-
-# classify using recall-focused threshold ----------------------------------
-test_data$pred_class <- ifelse(
-  test_data$prob_readmit >= threshold,
-  "Readmitted",
-  "Not_Readmitted"
-)
-
-test_data$pred_class <- factor(
-  test_data$pred_class,
-  levels = c("Not_Readmitted", "Readmitted")
-)
+ridge_class <- ifelse(ridge_probs > 0.5, 1, 0)
 ```
 
-```{r logistic_model evaluation}
-# model evaluation -----------------------------------------
-cm <- confusionMatrix(
-  test_data$pred_class,
-  test_data$readmitted_binary,
-  positive = "Readmitted"
+```{r}
+set.seed(1)
+
+lasso_model <- cv.glmnet(
+  x = x_train,
+  y = y_train,
+  alpha = 1,
+  family = "binomial"
 )
-cm
-auc(roc_obj)
-plot(roc_obj, main = "ROC Curve: Logistic Regression")
-abline(a = 0, b = 1, lty = 2)
+
+best_lambda_lasso <- lasso_model$lambda.min
+best_lambda_lasso
+
+lasso_probs <- predict(
+  lasso_model,
+  s = best_lambda_lasso,
+  newx = x_test,
+  type = "response"
+)
+
+lasso_class <- ifelse(lasso_probs > 0.5, 1, 0)
 ```
 
-The main logistic regression model was extended by adding HbA1c and interaction 
-terms. These different models were then compared to each other. A likelihood ratio 
-test  showed that HbA1c did not significantly improve  model fit (p=0.32). However, 
-the interaction model significantly reduced deviance compared to the HbA1c 
-model (p<0.001), suggesting improved fit.
+```{r}
+# Confusion matrices
+ridge_cm <- confusionMatrix(
+  factor(ridge_class, levels = c(0, 1)),
+  factor(y_test, levels = c(0, 1)),
+  positive = "1"
+)
 
-Due to class imbalance (only ~8.6% of patients were readmitted), using a default
-classification threshold of 0.5 resulted in a model that failed to identify 
-ny readmissions. To address this, we selected a lower threshold (~0.072) 
-based on the ROC curve to achieve approximately 70% sensitivity.
+lasso_cm <- confusionMatrix(
+  factor(lasso_class, levels = c(0, 1)),
+  factor(y_test, levels = c(0, 1)),
+  positive = "1"
+)
 
-At this threshold, the cost of reduced specificity (~47%) and precision (~11%), 
-reflected an increase in false positives. However, in a healthcare context, 
-false negatives (missed readmissions) are more costly than false positives, 
-making may deem this tradeoff appropriate. The model achieved an AUC of 0.623, 
-indicating a modest predictive performance.
+ridge_cm
+lasso_cm
+```
 
+```{r}
+# AUC values
+ridge_auc <- auc(y_test, as.numeric(ridge_probs))
+lasso_auc <- auc(y_test, as.numeric(lasso_probs))
+
+ridge_auc
+lasso_auc
+```
+
+```{r}
+comparison_table <- tibble(
+  Model = c("Ridge Regression", "LASSO Regression"),
+  Best_Lambda = c(best_lambda_ridge, best_lambda_lasso),
+  Accuracy = c(
+    ridge_cm$overall["Accuracy"],
+    lasso_cm$overall["Accuracy"]
+  ),
+  Sensitivity = c(
+    ridge_cm$byClass["Sensitivity"],
+    lasso_cm$byClass["Sensitivity"]
+  ),
+  Specificity = c(
+    ridge_cm$byClass["Specificity"],
+    lasso_cm$byClass["Specificity"]
+  ),
+  AUC = c(ridge_auc, lasso_auc)
+)
+
+comparison_table
+```
+
+
+```{r}
+lasso_coef <- coef(lasso_model, s = best_lambda_lasso)
+
+lasso_coef_df <- as.data.frame(as.matrix(lasso_coef)) %>%
+  rownames_to_column("Variable") %>%
+  rename(Coefficient = 2) %>%
+  filter(Coefficient != 0)
+
+lasso_coef_df
+```
+
+```{r}
+ridge_coef <- coef(ridge_model, s = best_lambda_ridge)
+
+ridge_coef_df <- as.data.frame(as.matrix(ridge_coef)) %>%
+  rownames_to_column("Variable") %>%
+  rename(Coefficient = 2)
+
+ridge_coef_df
+```
+
+Ridge and LASSO logistic regression models were used to predict 30-day readmission. 
+Both were tuned via cross-validation, yielding similar performance (accuracy ≈ 91.6%, 
+AUC ≈ 0.606) . 
+
+Due to class imbalance (only ~8.4% readmitted), the default 0.5 threshold resulted in 
+both models predicting no readmissions, with 0% sensitivity and 100% specificity.
+This high accuracy is therefore misleading, as it reflects the majority class rather than true predictive ability. 
+
+The modest AUC indicates limited discrimination. LASSO additionally performed variable 
+selection, highlighting key predictors such as discharge status and time in hospital, 
+while ridge retained all variables with shrinkage. 
+
+In this context, missing readmissions is more costly than false positives, suggesting 
+that a lower threshold or alternative evaluation approach would improve model usefulness.

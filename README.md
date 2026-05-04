@@ -48,7 +48,7 @@ install.packages(
 ```
 
 ```bash
-Rscript -e 'install.packages(c("knitr", "rmarkdown", "tidyverse", "dplyr", "readr", "caret", "pROC", "broom"), repos = "https://cloud.r-project.org")'
+Rscript -e 'install.packages(c("knitr", "rmarkdown", "tidyverse", "dplyr", "readr", "caret", "pROC", "broom", "glmnet"), repos = "https://cloud.r-project.org")'
 ```
 
 ### Render the report
