@@ -42,15 +42,13 @@ Start R (see above), then run:
 
 ```r
 install.packages(
-  c("knitr", "rmarkdown", "tidyverse", "dplyr", "readr"),
+  c("knitr", "rmarkdown", "tidyverse", "dplyr", "readr", "caret", "pROC", "broom"),
   repos = "https://cloud.r-project.org"
 )
 ```
 
-Or from the shell without entering R:
-
 ```bash
-Rscript -e 'install.packages(c("knitr", "rmarkdown", "tidyverse", "dplyr", "readr"), repos = "https://cloud.r-project.org")'
+Rscript -e 'install.packages(c("knitr", "rmarkdown", "tidyverse", "dplyr", "readr", "caret", "pROC", "broom"), repos = "https://cloud.r-project.org")'
 ```
 
 ### Render the report
@@ -58,16 +56,16 @@ Rscript -e 'install.packages(c("knitr", "rmarkdown", "tidyverse", "dplyr", "read
 From the project root:
 
 ```bash
-quarto render model.rmd
+quarto render project.Rmd
 ```
 
-This produces `model.html` next to the source file.
+This produces `project.html` next to the source file.
 
 ### Open the HTML output
 
 On macOS, from the project root:
 
 ```bash
-open model.html
+open project.html
 ```
 

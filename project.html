@@ -107,8 +107,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>JP Eliopoulos (jae257)</li>
 <li>Cole Garcia (cgg38)</li>
 <li>Allyanna Panganiban (amp388)</li>
-<li>Sarah ()</li>
+<li>Sarah Swee (sjs469)</li>
 </ul>
+<section id="data-pre-processing" class="level2">
+<h2 class="anchored" data-anchor-id="data-pre-processing">Data Pre-processing</h2>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># be sure to have installed the necessary packages prior to running this cell </span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># (see `README.md`)</span></span>
@@ -128,11 +130,32 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: lattice
+
+Attaching package: 'caret'
+
+The following object is masked from 'package:purrr':
+
+    lift</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pROC)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Type 'citation("pROC")' for a citation.
+
+Attaching package: 'pROC'
+
+The following objects are masked from 'package:stats':
+
+    cov, smooth, var</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(broom)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>diabetic <span class="ot">=</span> <span class="fu">read.csv</span>(<span class="st">"data/diabetic_data.csv"</span>, <span class="at">na=</span><span class="fu">c</span>(<span class="st">"?"</span>,<span class="st">"NA"</span>))</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(diabetic)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>diabetic <span class="ot">=</span> <span class="fu">read.csv</span>(<span class="st">"data/diabetic_data.csv"</span>, <span class="at">na=</span><span class="fu">c</span>(<span class="st">"?"</span>,<span class="st">"NA"</span>))</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(diabetic)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  encounter_id patient_nbr            race gender     age weight
 1      2278392     8222157       Caucasian Female  [0-10)   &lt;NA&gt;
@@ -205,8 +228,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 5                      No                     No     Ch         Yes         NO
 6                      No                     No     No         Yes        &gt;30</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>mapping <span class="ot">=</span> <span class="fu">read.csv</span>(<span class="st">"data/IDS_mapping.csv"</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(mapping)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>mapping <span class="ot">=</span> <span class="fu">read.csv</span>(<span class="st">"data/IDS_mapping.csv"</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(mapping)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  admission_type_id   description
 1                 1     Emergency
@@ -218,14 +241,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># remove high-missing &amp; irrelevant columns</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic <span class="sc">%&gt;%</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">any_of</span>(<span class="fu">c</span>(<span class="st">"weight"</span>, <span class="st">"payer_code"</span>))) <span class="sc">%&gt;%</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">medical_specialty =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(medical_specialty), <span class="st">"Missing"</span>, medical_specialty),</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">race =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(race), <span class="st">"Missing"</span>, race)</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(diabetic_clean)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># remove high-missing &amp; irrelevant columns</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic <span class="sc">%&gt;%</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">any_of</span>(<span class="fu">c</span>(<span class="st">"weight"</span>, <span class="st">"payer_code"</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">medical_specialty =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(medical_specialty), <span class="st">"Missing"</span>, medical_specialty),</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">race =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(race), <span class="st">"Missing"</span>, race)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(diabetic_clean)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  encounter_id patient_nbr            race gender     age admission_type_id
 1      2278392     8222157       Caucasian Female  [0-10)                 6
@@ -298,73 +321,73 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 5     Ch         Yes         NO
 6     No         Yes        &gt;30</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># keep only first encounter per patient</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(patient_nbr, encounter_id) <span class="sc">%&gt;%</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(patient_nbr, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"after keeping first encounter per patient:"</span>, <span class="fu">dim</span>(diabetic_clean), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># keep only first encounter per patient</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(patient_nbr, encounter_id) <span class="sc">%&gt;%</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(patient_nbr, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"after keeping first encounter per patient:"</span>, <span class="fu">dim</span>(diabetic_clean), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>after keeping first encounter per patient: 71518 48 </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># remove death/hospice discharges</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>death_hospice_ids <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">11</span>, <span class="dv">13</span>, <span class="dv">14</span>, <span class="dv">19</span>, <span class="dv">20</span>, <span class="dv">21</span>)</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>discharge_disposition_id <span class="sc">%in%</span> death_hospice_ids)</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"after removing death/hospice:"</span>, <span class="fu">dim</span>(diabetic_clean), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># remove death/hospice discharges</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>death_hospice_ids <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">11</span>, <span class="dv">13</span>, <span class="dv">14</span>, <span class="dv">19</span>, <span class="dv">20</span>, <span class="dv">21</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>discharge_disposition_id <span class="sc">%in%</span> death_hospice_ids)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"after removing death/hospice:"</span>, <span class="fu">dim</span>(diabetic_clean), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>after removing death/hospice: 69973 48 </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># check whether an ICD-9 diagnosis code indicates diabetes</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>is_diabetes_dx <span class="ot">&lt;-</span> <span class="cf">function</span>(code) {</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  code <span class="ot">&lt;-</span> <span class="fu">as.character</span>(code)</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">is.na</span>(code),</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="cn">FALSE</span>,</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">startsWith</span>(code,<span class="st">"250"</span>)</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># paper keeps stays between 1 and 14 days</span></span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    time_in_hospital <span class="sc">&gt;=</span> <span class="dv">1</span>,</span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    time_in_hospital <span class="sc">&lt;=</span> <span class="dv">14</span>,</span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># paper requires lab tests during the encounter</span></span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    num_lab_procedures <span class="sc">&gt;</span> <span class="dv">0</span>,</span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># paper requires medications during the encounter</span></span>
-<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    num_medications <span class="sc">&gt;</span> <span class="dv">0</span>,</span>
-<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># paper keeps diabetic encounters:</span></span>
-<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># diabetes appears in any diagnosis field</span></span>
-<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">is_diabetes_dx</span>(diag_1) <span class="sc">|</span></span>
-<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is_diabetes_dx</span>(diag_2) <span class="sc">|</span></span>
-<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is_diabetes_dx</span>(diag_3)</span>
-<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># check whether an ICD-9 diagnosis code indicates diabetes</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>is_diabetes_dx <span class="ot">&lt;-</span> <span class="cf">function</span>(code) {</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  code <span class="ot">&lt;-</span> <span class="fu">as.character</span>(code)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">is.na</span>(code),</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="cn">FALSE</span>,</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">startsWith</span>(code,<span class="st">"250"</span>)</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># paper keeps stays between 1 and 14 days</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    time_in_hospital <span class="sc">&gt;=</span> <span class="dv">1</span>,</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    time_in_hospital <span class="sc">&lt;=</span> <span class="dv">14</span>,</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># paper requires lab tests during the encounter</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>    num_lab_procedures <span class="sc">&gt;</span> <span class="dv">0</span>,</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># paper requires medications during the encounter</span></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>    num_medications <span class="sc">&gt;</span> <span class="dv">0</span>,</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># paper keeps diabetic encounters:</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># diabetes appears in any diagnosis field</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">is_diabetes_dx</span>(diag_1) <span class="sc">|</span></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is_diabetes_dx</span>(diag_2) <span class="sc">|</span></span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is_diabetes_dx</span>(diag_3)</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># creating binary readmission outcome</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">readmitted_binary =</span> <span class="fu">ifelse</span>(readmitted <span class="sc">==</span> <span class="st">"&lt;30"</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co"># create HbA1c group</span></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co"># HbA1c = a blood test measuring average blood sugar over ~3 months</span></span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="co"># paper has:</span></span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co"># no HbA1c test</span></span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="co"># normal result</span></span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="co"># high result and medication changed</span></span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="co"># high result and medication not changed</span></span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">hba1c_group =</span> <span class="fu">case_when</span>(</span>
-<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>      A1Cresult <span class="sc">==</span> <span class="st">"None"</span><span class="sc">~</span><span class="st">"No test"</span>,</span>
-<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>      A1Cresult <span class="sc">==</span> <span class="st">"Norm"</span><span class="sc">~</span><span class="st">"Normal"</span>,</span>
-<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>      A1Cresult <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"&gt;7"</span>,<span class="st">"&gt;8"</span>) <span class="sc">&amp;</span> change <span class="sc">==</span> <span class="st">"Ch"</span><span class="sc">~</span><span class="st">"High, medication changed"</span>,</span>
-<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>      A1Cresult <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"&gt;7"</span>,<span class="st">"&gt;8"</span>) <span class="sc">&amp;</span> change <span class="sc">==</span> <span class="st">"No"</span><span class="sc">~</span><span class="st">"High, medication not changed"</span>,</span>
-<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
-<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(diabetic_clean)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># creating binary readmission outcome</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">readmitted_binary =</span> <span class="fu">ifelse</span>(readmitted <span class="sc">==</span> <span class="st">"&lt;30"</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="co"># create HbA1c group</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="co"># HbA1c = a blood test measuring average blood sugar over ~3 months</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="co"># paper has:</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="co"># no HbA1c test</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="co"># normal result</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a><span class="co"># high result and medication changed</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a><span class="co"># high result and medication not changed</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">hba1c_group =</span> <span class="fu">case_when</span>(</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>      A1Cresult <span class="sc">==</span> <span class="st">"None"</span><span class="sc">~</span><span class="st">"No test"</span>,</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>      A1Cresult <span class="sc">==</span> <span class="st">"Norm"</span><span class="sc">~</span><span class="st">"Normal"</span>,</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>      A1Cresult <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"&gt;7"</span>,<span class="st">"&gt;8"</span>) <span class="sc">&amp;</span> change <span class="sc">==</span> <span class="st">"Ch"</span><span class="sc">~</span><span class="st">"High, medication changed"</span>,</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>      A1Cresult <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"&gt;7"</span>,<span class="st">"&gt;8"</span>) <span class="sc">&amp;</span> change <span class="sc">==</span> <span class="st">"No"</span><span class="sc">~</span><span class="st">"High, medication not changed"</span>,</span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(diabetic_clean)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  encounter_id patient_nbr            race gender     age admission_type_id
 1     29758806         378       Caucasian Female [50-60)                 3
@@ -439,55 +462,55 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># recoding age into age groups specified in paper</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">age_group_paper =</span> <span class="fu">case_when</span>(</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>      age <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"[0-10)"</span>, <span class="st">"[10-20)"</span>, <span class="st">"[20-30)"</span>) <span class="sc">~</span> <span class="st">"&lt;=30"</span>,</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>      age <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"[30-40)"</span>, <span class="st">"[40-50)"</span>, <span class="st">"[50-60)"</span>) <span class="sc">~</span> <span class="st">"30-60"</span>,</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>      age <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"[60-70)"</span>, <span class="st">"[70-80)"</span>, <span class="st">"[80-90)"</span>, <span class="st">"[90-100)"</span>) <span class="sc">~</span> <span class="st">"&gt;60"</span>,</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="co"># recoding primary diagnosis (encoded) into 8 meaningful groups</span></span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>diag_category <span class="ot">&lt;-</span> <span class="cf">function</span>(code) {</span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.na</span>(code)) {</span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Other"</span>)</span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>  code <span class="ot">&lt;-</span> <span class="fu">as.character</span>(code)</span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">startsWith</span>(code, <span class="st">"V"</span>) <span class="sc">||</span> <span class="fu">startsWith</span>(code, <span class="st">"E"</span>)) {</span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Other"</span>)</span>
-<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>  num <span class="ot">&lt;-</span> <span class="fu">suppressWarnings</span>(<span class="fu">as.numeric</span>(code))</span>
-<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.na</span>(num)) {</span>
-<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Other"</span>)</span>
-<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> ((num<span class="sc">&gt;=</span><span class="dv">390</span> <span class="sc">&amp;</span> num<span class="sc">&lt;=</span><span class="dv">459</span>) <span class="sc">|</span> num<span class="sc">==</span><span class="dv">785</span>) {</span>
-<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Circulatory"</span>)</span>
-<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> ((num<span class="sc">&gt;=</span><span class="dv">460</span> <span class="sc">&amp;</span> num<span class="sc">&lt;=</span><span class="dv">519</span>) <span class="sc">|</span> num<span class="sc">==</span><span class="dv">786</span>) {</span>
-<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Respiratory"</span>)</span>
-<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> ((num<span class="sc">&gt;=</span><span class="dv">520</span> <span class="sc">&amp;</span> num<span class="sc">&lt;=</span><span class="dv">579</span>) <span class="sc">|</span> num<span class="sc">==</span><span class="dv">787</span>) {</span>
-<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Digestive"</span>)</span>
-<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">floor</span>(num)<span class="sc">==</span><span class="dv">250</span>) {</span>
-<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Diabetes"</span>)</span>
-<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (num<span class="sc">&gt;=</span><span class="dv">800</span> <span class="sc">&amp;</span> num<span class="sc">&lt;=</span><span class="dv">999</span>) {</span>
-<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Injury"</span>)</span>
-<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (num<span class="sc">&gt;=</span><span class="dv">710</span> <span class="sc">&amp;</span> num<span class="sc">&lt;=</span><span class="dv">739</span>) {</span>
-<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Musculoskeletal"</span>)</span>
-<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> ((num<span class="sc">&gt;=</span><span class="dv">580</span> <span class="sc">&amp;</span> num<span class="sc">&lt;=</span><span class="dv">629</span>) <span class="sc">|</span> num<span class="sc">==</span><span class="dv">788</span>) {</span>
-<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Genitourinary"</span>)</span>
-<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (num<span class="sc">&gt;=</span><span class="dv">140</span> <span class="sc">&amp;</span> num<span class="sc">&lt;=</span><span class="dv">239</span>) {</span>
-<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Neoplasms"</span>)</span>
-<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
-<span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Other"</span>)</span>
-<span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb17-43"><a href="#cb17-43" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb17-44"><a href="#cb17-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-45"><a href="#cb17-45" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
-<span id="cb17-46"><a href="#cb17-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb17-47"><a href="#cb17-47" aria-hidden="true" tabindex="-1"></a>    <span class="at">primary_diagnosis_group =</span> <span class="fu">sapply</span>(diag_1, diag_category)</span>
-<span id="cb17-48"><a href="#cb17-48" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb17-49"><a href="#cb17-49" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(diabetic_clean)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># recoding age into age groups specified in paper</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">age_group_paper =</span> <span class="fu">case_when</span>(</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>      age <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"[0-10)"</span>, <span class="st">"[10-20)"</span>, <span class="st">"[20-30)"</span>) <span class="sc">~</span> <span class="st">"&lt;=30"</span>,</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>      age <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"[30-40)"</span>, <span class="st">"[40-50)"</span>, <span class="st">"[50-60)"</span>) <span class="sc">~</span> <span class="st">"30-60"</span>,</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>      age <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"[60-70)"</span>, <span class="st">"[70-80)"</span>, <span class="st">"[80-90)"</span>, <span class="st">"[90-100)"</span>) <span class="sc">~</span> <span class="st">"&gt;60"</span>,</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a><span class="co"># recoding primary diagnosis (encoded) into 8 meaningful groups</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>diag_category <span class="ot">&lt;-</span> <span class="cf">function</span>(code) {</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.na</span>(code)) {</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Other"</span>)</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>  code <span class="ot">&lt;-</span> <span class="fu">as.character</span>(code)</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">startsWith</span>(code, <span class="st">"V"</span>) <span class="sc">||</span> <span class="fu">startsWith</span>(code, <span class="st">"E"</span>)) {</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Other"</span>)</span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>  num <span class="ot">&lt;-</span> <span class="fu">suppressWarnings</span>(<span class="fu">as.numeric</span>(code))</span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.na</span>(num)) {</span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Other"</span>)</span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> ((num<span class="sc">&gt;=</span><span class="dv">390</span> <span class="sc">&amp;</span> num<span class="sc">&lt;=</span><span class="dv">459</span>) <span class="sc">|</span> num<span class="sc">==</span><span class="dv">785</span>) {</span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Circulatory"</span>)</span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> ((num<span class="sc">&gt;=</span><span class="dv">460</span> <span class="sc">&amp;</span> num<span class="sc">&lt;=</span><span class="dv">519</span>) <span class="sc">|</span> num<span class="sc">==</span><span class="dv">786</span>) {</span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Respiratory"</span>)</span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> ((num<span class="sc">&gt;=</span><span class="dv">520</span> <span class="sc">&amp;</span> num<span class="sc">&lt;=</span><span class="dv">579</span>) <span class="sc">|</span> num<span class="sc">==</span><span class="dv">787</span>) {</span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Digestive"</span>)</span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">floor</span>(num)<span class="sc">==</span><span class="dv">250</span>) {</span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Diabetes"</span>)</span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (num<span class="sc">&gt;=</span><span class="dv">800</span> <span class="sc">&amp;</span> num<span class="sc">&lt;=</span><span class="dv">999</span>) {</span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Injury"</span>)</span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (num<span class="sc">&gt;=</span><span class="dv">710</span> <span class="sc">&amp;</span> num<span class="sc">&lt;=</span><span class="dv">739</span>) {</span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Musculoskeletal"</span>)</span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> ((num<span class="sc">&gt;=</span><span class="dv">580</span> <span class="sc">&amp;</span> num<span class="sc">&lt;=</span><span class="dv">629</span>) <span class="sc">|</span> num<span class="sc">==</span><span class="dv">788</span>) {</span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Genitourinary"</span>)</span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (num<span class="sc">&gt;=</span><span class="dv">140</span> <span class="sc">&amp;</span> num<span class="sc">&lt;=</span><span class="dv">239</span>) {</span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Neoplasms"</span>)</span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"Other"</span>)</span>
+<span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb21-43"><a href="#cb21-43" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb21-44"><a href="#cb21-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-45"><a href="#cb21-45" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
+<span id="cb21-46"><a href="#cb21-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb21-47"><a href="#cb21-47" aria-hidden="true" tabindex="-1"></a>    <span class="at">primary_diagnosis_group =</span> <span class="fu">sapply</span>(diag_1, diag_category)</span>
+<span id="cb21-48"><a href="#cb21-48" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb21-49"><a href="#cb21-49" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(diabetic_clean)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  encounter_id patient_nbr            race gender     age admission_type_id
 1     29758806         378       Caucasian Female [50-60)                 3
@@ -567,82 +590,82 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 5             &gt;60         Musculoskeletal
 6             &gt;60             Circulatory</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># recoding admission source</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">admission_source_group =</span> <span class="fu">case_when</span>(</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>      admission_source_id <span class="sc">==</span> <span class="dv">7</span> <span class="sc">~</span> <span class="st">"Emergency room"</span>,</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>      admission_source_id <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">"Physician/clinic referral"</span>,</span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"Otherwise"</span></span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="co"># recoding discharge disposition</span></span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">discharge_home =</span> <span class="fu">ifelse</span>(</span>
-<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>      discharge_disposition_id<span class="sc">==</span><span class="dv">1</span>,</span>
-<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Discharged to home"</span>,</span>
-<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Otherwise"</span></span>
-<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a><span class="co"># recoding medical specialty into main groups</span></span>
-<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>surgery_specialties <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
-<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-General"</span>,</span>
-<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Cardiovascular/Thoracic"</span>,</span>
-<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Neuro"</span>,</span>
-<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Vascular"</span>,</span>
-<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Plastic"</span>,</span>
-<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Cardiovascular"</span>,</span>
-<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Thoracic"</span>,</span>
-<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Colon&amp;Rectal"</span>,</span>
-<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Pediatric"</span>,</span>
-<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Maxillofacial"</span></span>
-<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
-<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">medical_specialty_group =</span> <span class="fu">case_when</span>(</span>
-<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is.na</span>(medical_specialty) <span class="sc">|</span> medical_specialty <span class="sc">==</span> <span class="st">"Missing"</span> <span class="sc">~</span> <span class="st">"Missing or unknown"</span>,</span>
-<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a>      medical_specialty <span class="sc">==</span> <span class="st">"InternalMedicine"</span> <span class="sc">~</span> <span class="st">"Internal Medicine"</span>,</span>
-<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a>      medical_specialty <span class="sc">==</span> <span class="st">"Cardiology"</span> <span class="sc">~</span> <span class="st">"Cardiology"</span>,</span>
-<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a>      medical_specialty <span class="sc">%in%</span> surgery_specialties <span class="sc">~</span> <span class="st">"Surgery"</span>,</span>
-<span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a>      medical_specialty <span class="sc">==</span> <span class="st">"Family/GeneralPractice"</span> <span class="sc">~</span> <span class="st">"Family/general practice"</span>,</span>
-<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"Other"</span></span>
-<span id="cb19-43"><a href="#cb19-43" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb19-44"><a href="#cb19-44" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># recoding admission source</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">admission_source_group =</span> <span class="fu">case_when</span>(</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>      admission_source_id <span class="sc">==</span> <span class="dv">7</span> <span class="sc">~</span> <span class="st">"Emergency room"</span>,</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>      admission_source_id <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">"Physician/clinic referral"</span>,</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"Otherwise"</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="co"># recoding discharge disposition</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">discharge_home =</span> <span class="fu">ifelse</span>(</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>      discharge_disposition_id<span class="sc">==</span><span class="dv">1</span>,</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Discharged to home"</span>,</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Otherwise"</span></span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a><span class="co"># recoding medical specialty into main groups</span></span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>surgery_specialties <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-General"</span>,</span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Cardiovascular/Thoracic"</span>,</span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Neuro"</span>,</span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Vascular"</span>,</span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Plastic"</span>,</span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Cardiovascular"</span>,</span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Thoracic"</span>,</span>
+<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Colon&amp;Rectal"</span>,</span>
+<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Pediatric"</span>,</span>
+<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Surgery-Maxillofacial"</span></span>
+<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-34"><a href="#cb23-34" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
+<span id="cb23-35"><a href="#cb23-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb23-36"><a href="#cb23-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">medical_specialty_group =</span> <span class="fu">case_when</span>(</span>
+<span id="cb23-37"><a href="#cb23-37" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is.na</span>(medical_specialty) <span class="sc">|</span> medical_specialty <span class="sc">==</span> <span class="st">"Missing"</span> <span class="sc">~</span> <span class="st">"Missing or unknown"</span>,</span>
+<span id="cb23-38"><a href="#cb23-38" aria-hidden="true" tabindex="-1"></a>      medical_specialty <span class="sc">==</span> <span class="st">"InternalMedicine"</span> <span class="sc">~</span> <span class="st">"Internal Medicine"</span>,</span>
+<span id="cb23-39"><a href="#cb23-39" aria-hidden="true" tabindex="-1"></a>      medical_specialty <span class="sc">==</span> <span class="st">"Cardiology"</span> <span class="sc">~</span> <span class="st">"Cardiology"</span>,</span>
+<span id="cb23-40"><a href="#cb23-40" aria-hidden="true" tabindex="-1"></a>      medical_specialty <span class="sc">%in%</span> surgery_specialties <span class="sc">~</span> <span class="st">"Surgery"</span>,</span>
+<span id="cb23-41"><a href="#cb23-41" aria-hidden="true" tabindex="-1"></a>      medical_specialty <span class="sc">==</span> <span class="st">"Family/GeneralPractice"</span> <span class="sc">~</span> <span class="st">"Family/general practice"</span>,</span>
+<span id="cb23-42"><a href="#cb23-42" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"Other"</span></span>
+<span id="cb23-43"><a href="#cb23-43" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-44"><a href="#cb23-44" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># selecting final variables</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>final_cols <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"encounter_id"</span>,</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"patient_nbr"</span>,</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"readmitted"</span>,</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"readmitted_binary"</span>,</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"hba1c_group"</span>,</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"gender"</span>,</span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"age"</span>,</span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">"age_group_paper"</span>,</span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">"race"</span>,</span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"admission_source_id"</span>,</span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"admission_source_group"</span>,</span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"discharge_disposition_id"</span>,</span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"discharge_home"</span>,</span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"diag_1"</span>,</span>
-<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">"primary_diagnosis_group"</span>,</span>
-<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>  <span class="st">"medical_specialty"</span>,</span>
-<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>  <span class="st">"medical_specialty_group"</span>,</span>
-<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>  <span class="st">"time_in_hospital"</span></span>
-<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
-<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">any_of</span>(final_cols))</span>
-<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"final shape:"</span>, <span class="fu">dim</span>(diabetic_clean), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># selecting final variables</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>final_cols <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"encounter_id"</span>,</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"patient_nbr"</span>,</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"readmitted"</span>,</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"readmitted_binary"</span>,</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"hba1c_group"</span>,</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"gender"</span>,</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"age"</span>,</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">"age_group_paper"</span>,</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">"race"</span>,</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"admission_source_id"</span>,</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"admission_source_group"</span>,</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"discharge_disposition_id"</span>,</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"discharge_home"</span>,</span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"diag_1"</span>,</span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">"primary_diagnosis_group"</span>,</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>  <span class="st">"medical_specialty"</span>,</span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>  <span class="st">"medical_specialty_group"</span>,</span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>  <span class="st">"time_in_hospital"</span></span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>diabetic_clean <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">any_of</span>(final_cols))</span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"final shape:"</span>, <span class="fu">dim</span>(diabetic_clean), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>final shape: 27577 18 </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(diabetic_clean)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(diabetic_clean)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  encounter_id patient_nbr readmitted readmitted_binary
 1     29758806         378         NO                 0
@@ -681,6 +704,896 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 6              Cardiology                7</code></pre>
 </div>
 </div>
+</section>
+<section id="modeling" class="level2">
+<h2 class="anchored" data-anchor-id="modeling">Modeling</h2>
+<section id="a.-logistic-regression" class="level3">
+<h3 class="anchored" data-anchor-id="a.-logistic-regression">A. Logistic Regression</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># preparing data for logistic -----------------------------------------------</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>model_data <span class="ot">&lt;-</span> diabetic_clean <span class="sc">%&gt;%</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    readmitted_binary,</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    hba1c_group,</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    age_group_paper,</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    race,</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    admission_source_group,</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    discharge_home,</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>    primary_diagnosis_group,</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>    medical_specialty_group,</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>    time_in_hospital</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">readmitted_binary =</span> <span class="fu">factor</span>(</span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>      readmitted_binary,</span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a>      <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Not_Readmitted"</span>, <span class="st">"Readmitted"</span>)</span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">across</span>(</span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a>      <span class="fu">c</span>(hba1c_group, age_group_paper, race, admission_source_group,</span>
+<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a>        discharge_home, primary_diagnosis_group, medical_specialty_group),</span>
+<span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a>      as.factor</span>
+<span id="cb28-24"><a href="#cb28-24" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb28-25"><a href="#cb28-25" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb28-26"><a href="#cb28-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-27"><a href="#cb28-27" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb28-28"><a href="#cb28-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-29"><a href="#cb28-29" aria-hidden="true" tabindex="-1"></a>train_index <span class="ot">&lt;-</span> <span class="fu">createDataPartition</span>(</span>
+<span id="cb28-30"><a href="#cb28-30" aria-hidden="true" tabindex="-1"></a>  model_data<span class="sc">$</span>readmitted_binary,</span>
+<span id="cb28-31"><a href="#cb28-31" aria-hidden="true" tabindex="-1"></a>  <span class="at">p =</span> <span class="fl">0.70</span>,</span>
+<span id="cb28-32"><a href="#cb28-32" aria-hidden="true" tabindex="-1"></a>  <span class="at">list =</span> <span class="cn">FALSE</span></span>
+<span id="cb28-33"><a href="#cb28-33" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-34"><a href="#cb28-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-35"><a href="#cb28-35" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span> model_data[train_index, ]</span>
+<span id="cb28-36"><a href="#cb28-36" aria-hidden="true" tabindex="-1"></a>test_data  <span class="ot">&lt;-</span> model_data[<span class="sc">-</span>train_index, ]</span>
+<span id="cb28-37"><a href="#cb28-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-38"><a href="#cb28-38" aria-hidden="true" tabindex="-1"></a><span class="co"># logistic regression model ------------------------------------------------</span></span>
+<span id="cb28-39"><a href="#cb28-39" aria-hidden="true" tabindex="-1"></a>logistic <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb28-40"><a href="#cb28-40" aria-hidden="true" tabindex="-1"></a>  readmitted_binary <span class="sc">~</span> discharge_home <span class="sc">+</span></span>
+<span id="cb28-41"><a href="#cb28-41" aria-hidden="true" tabindex="-1"></a>    race <span class="sc">+</span></span>
+<span id="cb28-42"><a href="#cb28-42" aria-hidden="true" tabindex="-1"></a>    admission_source_group <span class="sc">+</span></span>
+<span id="cb28-43"><a href="#cb28-43" aria-hidden="true" tabindex="-1"></a>    medical_specialty_group <span class="sc">+</span></span>
+<span id="cb28-44"><a href="#cb28-44" aria-hidden="true" tabindex="-1"></a>    time_in_hospital <span class="sc">+</span></span>
+<span id="cb28-45"><a href="#cb28-45" aria-hidden="true" tabindex="-1"></a>    age_group_paper <span class="sc">+</span></span>
+<span id="cb28-46"><a href="#cb28-46" aria-hidden="true" tabindex="-1"></a>    primary_diagnosis_group,</span>
+<span id="cb28-47"><a href="#cb28-47" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> train_data,</span>
+<span id="cb28-48"><a href="#cb28-48" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> binomial</span>
+<span id="cb28-49"><a href="#cb28-49" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-50"><a href="#cb28-50" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(logistic)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = readmitted_binary ~ discharge_home + race + admission_source_group + 
+    medical_specialty_group + time_in_hospital + age_group_paper + 
+    primary_diagnosis_group, family = binomial, data = train_data)
+
+Coefficients:
+                                                 Estimate Std. Error z value
+(Intercept)                                     -3.104184   0.196737 -15.778
+discharge_homeOtherwise                          0.570163   0.057565   9.905
+raceAsian                                       -0.148031   0.372863  -0.397
+raceCaucasian                                    0.108865   0.067052   1.624
+raceHispanic                                     0.051846   0.177729   0.292
+raceMissing                                     -0.034921   0.172678  -0.202
+raceOther                                       -0.386751   0.244634  -1.581
+admission_source_groupOtherwise                 -0.025402   0.076677  -0.331
+admission_source_groupPhysician/clinic referral  0.007824   0.062850   0.124
+medical_specialty_groupFamily/general practice   0.332653   0.161908   2.055
+medical_specialty_groupInternal Medicine         0.226950   0.151062   1.502
+medical_specialty_groupMissing or unknown        0.238716   0.141689   1.685
+medical_specialty_groupOther                     0.112058   0.152084   0.737
+medical_specialty_groupSurgery                   0.165485   0.173682   0.953
+time_in_hospital                                 0.050329   0.009133   5.511
+age_group_paper&gt;60                               0.185426   0.134741   1.376
+age_group_paper30-60                             0.031905   0.134497   0.237
+primary_diagnosis_groupDiabetes                  0.006595   0.078908   0.084
+primary_diagnosis_groupDigestive                -0.136384   0.111319  -1.225
+primary_diagnosis_groupGenitourinary            -0.212849   0.154900  -1.374
+primary_diagnosis_groupInjury                    0.133088   0.121648   1.094
+primary_diagnosis_groupMusculoskeletal          -0.170429   0.117435  -1.451
+primary_diagnosis_groupNeoplasms                -0.228968   0.172551  -1.327
+primary_diagnosis_groupOther                    -0.045167   0.085536  -0.528
+primary_diagnosis_groupRespiratory              -0.334162   0.099336  -3.364
+                                                Pr(&gt;|z|)    
+(Intercept)                                      &lt; 2e-16 ***
+discharge_homeOtherwise                          &lt; 2e-16 ***
+raceAsian                                       0.691359    
+raceCaucasian                                   0.104465    
+raceHispanic                                    0.770506    
+raceMissing                                     0.839737    
+raceOther                                       0.113893    
+admission_source_groupOtherwise                 0.740431    
+admission_source_groupPhysician/clinic referral 0.900933    
+medical_specialty_groupFamily/general practice  0.039919 *  
+medical_specialty_groupInternal Medicine        0.133003    
+medical_specialty_groupMissing or unknown       0.092028 .  
+medical_specialty_groupOther                    0.461236    
+medical_specialty_groupSurgery                  0.340689    
+time_in_hospital                                3.57e-08 ***
+age_group_paper&gt;60                              0.168771    
+age_group_paper30-60                            0.812489    
+primary_diagnosis_groupDiabetes                 0.933390    
+primary_diagnosis_groupDigestive                0.220512    
+primary_diagnosis_groupGenitourinary            0.169410    
+primary_diagnosis_groupInjury                   0.273936    
+primary_diagnosis_groupMusculoskeletal          0.146706    
+primary_diagnosis_groupNeoplasms                0.184524    
+primary_diagnosis_groupOther                    0.597471    
+primary_diagnosis_groupRespiratory              0.000768 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 11305  on 19304  degrees of freedom
+Residual deviance: 11035  on 19280  degrees of freedom
+AIC: 11085
+
+Number of Fisher Scoring iterations: 5</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># add HbA1c group</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>hba1c_logistic <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  readmitted_binary <span class="sc">~</span> discharge_home <span class="sc">+</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    race <span class="sc">+</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    admission_source_group <span class="sc">+</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    medical_specialty_group <span class="sc">+</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    time_in_hospital <span class="sc">+</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    age_group_paper <span class="sc">+</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>    primary_diagnosis_group <span class="sc">+</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>    hba1c_group,</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> train_data,</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> binomial</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(hba1c_logistic)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = readmitted_binary ~ discharge_home + race + admission_source_group + 
+    medical_specialty_group + time_in_hospital + age_group_paper + 
+    primary_diagnosis_group + hba1c_group, family = binomial, 
+    data = train_data)
+
+Coefficients:
+                                                  Estimate Std. Error z value
+(Intercept)                                     -3.1640236  0.2104222 -15.037
+discharge_homeOtherwise                          0.5682582  0.0576171   9.863
+raceAsian                                       -0.1366518  0.3729935  -0.366
+raceCaucasian                                    0.1104720  0.0670843   1.647
+raceHispanic                                     0.0597096  0.1777986   0.336
+raceMissing                                     -0.0280649  0.1727769  -0.162
+raceOther                                       -0.3795717  0.2446645  -1.551
+admission_source_groupOtherwise                 -0.0357773  0.0770915  -0.464
+admission_source_groupPhysician/clinic referral  0.0002269  0.0630758   0.004
+medical_specialty_groupFamily/general practice   0.3312818  0.1619094   2.046
+medical_specialty_groupInternal Medicine         0.2321421  0.1511367   1.536
+medical_specialty_groupMissing or unknown        0.2350144  0.1417138   1.658
+medical_specialty_groupOther                     0.1116309  0.1520879   0.734
+medical_specialty_groupSurgery                   0.1590031  0.1737327   0.915
+time_in_hospital                                 0.0517169  0.0091978   5.623
+age_group_paper&gt;60                               0.1601292  0.1353496   1.183
+age_group_paper30-60                             0.0159180  0.1347608   0.118
+primary_diagnosis_groupDiabetes                  0.0140736  0.0790610   0.178
+primary_diagnosis_groupDigestive                -0.1464033  0.1115122  -1.313
+primary_diagnosis_groupGenitourinary            -0.2160542  0.1549226  -1.395
+primary_diagnosis_groupInjury                    0.1218201  0.1218108   1.000
+primary_diagnosis_groupMusculoskeletal          -0.1804152  0.1175812  -1.534
+primary_diagnosis_groupNeoplasms                -0.2393689  0.1726475  -1.386
+primary_diagnosis_groupOther                    -0.0502558  0.0856146  -0.587
+primary_diagnosis_groupRespiratory              -0.3366031  0.0993916  -3.387
+hba1c_groupHigh, medication not changed         -0.0690675  0.1348244  -0.512
+hba1c_groupNo test                               0.1044352  0.0860976   1.213
+hba1c_groupNormal                                0.0826499  0.1427305   0.579
+                                                Pr(&gt;|z|)    
+(Intercept)                                      &lt; 2e-16 ***
+discharge_homeOtherwise                          &lt; 2e-16 ***
+raceAsian                                       0.714093    
+raceCaucasian                                   0.099606 .  
+raceHispanic                                    0.737001    
+raceMissing                                     0.870964    
+raceOther                                       0.120807    
+admission_source_groupOtherwise                 0.642584    
+admission_source_groupPhysician/clinic referral 0.997130    
+medical_specialty_groupFamily/general practice  0.040747 *  
+medical_specialty_groupInternal Medicine        0.124545    
+medical_specialty_groupMissing or unknown       0.097242 .  
+medical_specialty_groupOther                    0.462955    
+medical_specialty_groupSurgery                  0.360078    
+time_in_hospital                                1.88e-08 ***
+age_group_paper&gt;60                              0.236778    
+age_group_paper30-60                            0.905972    
+primary_diagnosis_groupDiabetes                 0.858715    
+primary_diagnosis_groupDigestive                0.189220    
+primary_diagnosis_groupGenitourinary            0.163138    
+primary_diagnosis_groupInjury                   0.317274    
+primary_diagnosis_groupMusculoskeletal          0.124934    
+primary_diagnosis_groupNeoplasms                0.165606    
+primary_diagnosis_groupOther                    0.557203    
+primary_diagnosis_groupRespiratory              0.000708 ***
+hba1c_groupHigh, medication not changed         0.608457    
+hba1c_groupNo test                              0.225135    
+hba1c_groupNormal                               0.562547    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 11305  on 19304  degrees of freedom
+Residual deviance: 11032  on 19277  degrees of freedom
+AIC: 11088
+
+Number of Fisher Scoring iterations: 5</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># compare core model vs HbA1c logistic ------------------------------------</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(logistic, hba1c_logistic, <span class="at">test =</span> <span class="st">"Chisq"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Analysis of Deviance Table
+
+Model 1: readmitted_binary ~ discharge_home + race + admission_source_group + 
+    medical_specialty_group + time_in_hospital + age_group_paper + 
+    primary_diagnosis_group
+Model 2: readmitted_binary ~ discharge_home + race + admission_source_group + 
+    medical_specialty_group + time_in_hospital + age_group_paper + 
+    primary_diagnosis_group + hba1c_group
+  Resid. Df Resid. Dev Df Deviance Pr(&gt;Chi)
+1     19280      11035                     
+2     19277      11032  3    3.487   0.3225</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># interaction terms -------------------------------------------------------</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>interaction_model <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  readmitted_binary <span class="sc">~</span> discharge_home <span class="sc">+</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    race <span class="sc">+</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    admission_source_group <span class="sc">+</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    medical_specialty_group <span class="sc">+</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>    time_in_hospital <span class="sc">+</span></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>    age_group_paper <span class="sc">+</span></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    primary_diagnosis_group <span class="sc">+</span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>    hba1c_group <span class="sc">+</span></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># interactions described in the paper</span></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>    discharge_home<span class="sc">:</span>race <span class="sc">+</span></span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>    discharge_home<span class="sc">:</span>medical_specialty_group <span class="sc">+</span></span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>    discharge_home<span class="sc">:</span>primary_diagnosis_group <span class="sc">+</span></span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>    discharge_home<span class="sc">:</span>time_in_hospital <span class="sc">+</span></span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>    medical_specialty_group<span class="sc">:</span>time_in_hospital <span class="sc">+</span></span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a>    medical_specialty_group<span class="sc">:</span>age_group_paper <span class="sc">+</span></span>
+<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a>    primary_diagnosis_group<span class="sc">:</span>time_in_hospital <span class="sc">+</span></span>
+<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a>    primary_diagnosis_group<span class="sc">:</span>hba1c_group,</span>
+<span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> train_data,</span>
+<span id="cb34-21"><a href="#cb34-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> binomial</span>
+<span id="cb34-22"><a href="#cb34-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb34-23"><a href="#cb34-23" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(interaction_model)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = readmitted_binary ~ discharge_home + race + admission_source_group + 
+    medical_specialty_group + time_in_hospital + age_group_paper + 
+    primary_diagnosis_group + hba1c_group + discharge_home:race + 
+    discharge_home:medical_specialty_group + discharge_home:primary_diagnosis_group + 
+    discharge_home:time_in_hospital + medical_specialty_group:time_in_hospital + 
+    medical_specialty_group:age_group_paper + primary_diagnosis_group:time_in_hospital + 
+    primary_diagnosis_group:hba1c_group, family = binomial, data = train_data)
+
+Coefficients: (1 not defined because of singularities)
+                                                                                 Estimate
+(Intercept)                                                                     -3.787125
+discharge_homeOtherwise                                                          0.204598
+raceAsian                                                                       -0.484952
+raceCaucasian                                                                    0.001355
+raceHispanic                                                                    -0.294663
+raceMissing                                                                     -0.432929
+raceOther                                                                       -0.434183
+admission_source_groupOtherwise                                                 -0.017583
+admission_source_groupPhysician/clinic referral                                  0.010093
+medical_specialty_groupFamily/general practice                                   0.082496
+medical_specialty_groupInternal Medicine                                         0.989017
+medical_specialty_groupMissing or unknown                                        1.541058
+medical_specialty_groupOther                                                     0.143129
+medical_specialty_groupSurgery                                                   0.622226
+time_in_hospital                                                                 0.133821
+age_group_paper&gt;60                                                               0.729065
+age_group_paper30-60                                                             0.638492
+primary_diagnosis_groupDiabetes                                                 -0.242008
+primary_diagnosis_groupDigestive                                                 0.017426
+primary_diagnosis_groupGenitourinary                                            -0.396830
+primary_diagnosis_groupInjury                                                   -0.139890
+primary_diagnosis_groupMusculoskeletal                                          -0.709673
+primary_diagnosis_groupNeoplasms                                                -0.064956
+primary_diagnosis_groupOther                                                    -0.116228
+primary_diagnosis_groupRespiratory                                              -0.800466
+hba1c_groupHigh, medication not changed                                         -0.203363
+hba1c_groupNo test                                                               0.050071
+hba1c_groupNormal                                                                0.046401
+discharge_homeOtherwise:raceAsian                                                0.820344
+discharge_homeOtherwise:raceCaucasian                                            0.290151
+discharge_homeOtherwise:raceHispanic                                             1.050036
+discharge_homeOtherwise:raceMissing                                              0.971239
+discharge_homeOtherwise:raceOther                                                0.142639
+discharge_homeOtherwise:medical_specialty_groupFamily/general practice           0.146053
+discharge_homeOtherwise:medical_specialty_groupInternal Medicine                 0.285605
+discharge_homeOtherwise:medical_specialty_groupMissing or unknown                0.108657
+discharge_homeOtherwise:medical_specialty_groupOther                             0.036813
+discharge_homeOtherwise:medical_specialty_groupSurgery                           0.664099
+discharge_homeOtherwise:primary_diagnosis_groupDiabetes                          0.121869
+discharge_homeOtherwise:primary_diagnosis_groupDigestive                        -0.024428
+discharge_homeOtherwise:primary_diagnosis_groupGenitourinary                    -0.205234
+discharge_homeOtherwise:primary_diagnosis_groupInjury                            0.460114
+discharge_homeOtherwise:primary_diagnosis_groupMusculoskeletal                   0.820906
+discharge_homeOtherwise:primary_diagnosis_groupNeoplasms                        -0.501972
+discharge_homeOtherwise:primary_diagnosis_groupOther                             0.347624
+discharge_homeOtherwise:primary_diagnosis_groupRespiratory                       0.279932
+discharge_homeOtherwise:time_in_hospital                                        -0.051739
+medical_specialty_groupFamily/general practice:time_in_hospital                 -0.030636
+medical_specialty_groupInternal Medicine:time_in_hospital                       -0.062152
+medical_specialty_groupMissing or unknown:time_in_hospital                      -0.061467
+medical_specialty_groupOther:time_in_hospital                                   -0.039710
+medical_specialty_groupSurgery:time_in_hospital                                 -0.168837
+medical_specialty_groupFamily/general practice:age_group_paper&gt;60                0.369153
+medical_specialty_groupInternal Medicine:age_group_paper&gt;60                     -0.636468
+medical_specialty_groupMissing or unknown:age_group_paper&gt;60                    -1.085821
+medical_specialty_groupOther:age_group_paper&gt;60                                  0.163247
+medical_specialty_groupSurgery:age_group_paper&gt;60                               -0.031562
+medical_specialty_groupFamily/general practice:age_group_paper30-60              0.245121
+medical_specialty_groupInternal Medicine:age_group_paper30-60                   -0.620548
+medical_specialty_groupMissing or unknown:age_group_paper30-60                  -1.183774
+medical_specialty_groupOther:age_group_paper30-60                                0.189234
+medical_specialty_groupSurgery:age_group_paper30-60                                    NA
+time_in_hospital:primary_diagnosis_groupDiabetes                                 0.020177
+time_in_hospital:primary_diagnosis_groupDigestive                                0.035986
+time_in_hospital:primary_diagnosis_groupGenitourinary                            0.068867
+time_in_hospital:primary_diagnosis_groupInjury                                  -0.028933
+time_in_hospital:primary_diagnosis_groupMusculoskeletal                          0.051690
+time_in_hospital:primary_diagnosis_groupNeoplasms                                0.009675
+time_in_hospital:primary_diagnosis_groupOther                                   -0.070194
+time_in_hospital:primary_diagnosis_groupRespiratory                              0.069004
+primary_diagnosis_groupDiabetes:hba1c_groupHigh, medication not changed         -0.046532
+primary_diagnosis_groupDigestive:hba1c_groupHigh, medication not changed        -0.992655
+primary_diagnosis_groupGenitourinary:hba1c_groupHigh, medication not changed     0.446058
+primary_diagnosis_groupInjury:hba1c_groupHigh, medication not changed            0.015894
+primary_diagnosis_groupMusculoskeletal:hba1c_groupHigh, medication not changed  -0.255181
+primary_diagnosis_groupNeoplasms:hba1c_groupHigh, medication not changed         0.906034
+primary_diagnosis_groupOther:hba1c_groupHigh, medication not changed             0.866783
+primary_diagnosis_groupRespiratory:hba1c_groupHigh, medication not changed       0.517855
+primary_diagnosis_groupDiabetes:hba1c_groupNo test                               0.142459
+primary_diagnosis_groupDigestive:hba1c_groupNo test                             -0.323779
+primary_diagnosis_groupGenitourinary:hba1c_groupNo test                         -0.037102
+primary_diagnosis_groupInjury:hba1c_groupNo test                                 0.137906
+primary_diagnosis_groupMusculoskeletal:hba1c_groupNo test                       -0.278587
+primary_diagnosis_groupNeoplasms:hba1c_groupNo test                             -0.098025
+primary_diagnosis_groupOther:hba1c_groupNo test                                  0.170895
+primary_diagnosis_groupRespiratory:hba1c_groupNo test                            0.060743
+primary_diagnosis_groupDiabetes:hba1c_groupNormal                                0.121926
+primary_diagnosis_groupDigestive:hba1c_groupNormal                              -0.531770
+primary_diagnosis_groupGenitourinary:hba1c_groupNormal                         -12.301238
+primary_diagnosis_groupInjury:hba1c_groupNormal                                 -0.236094
+primary_diagnosis_groupMusculoskeletal:hba1c_groupNormal                        -0.061424
+primary_diagnosis_groupNeoplasms:hba1c_groupNormal                             -12.361977
+primary_diagnosis_groupOther:hba1c_groupNormal                                   0.535930
+primary_diagnosis_groupRespiratory:hba1c_groupNormal                            -0.297521
+                                                                               Std. Error
+(Intercept)                                                                      1.096808
+discharge_homeOtherwise                                                          0.364379
+raceAsian                                                                        0.518961
+raceCaucasian                                                                    0.085571
+raceHispanic                                                                     0.242340
+raceMissing                                                                      0.242593
+raceOther                                                                        0.319475
+admission_source_groupOtherwise                                                  0.077583
+admission_source_groupPhysician/clinic referral                                  0.063910
+medical_specialty_groupFamily/general practice                                   1.305273
+medical_specialty_groupInternal Medicine                                         1.140918
+medical_specialty_groupMissing or unknown                                        1.095889
+medical_specialty_groupOther                                                     1.123132
+medical_specialty_groupSurgery                                                   0.364426
+time_in_hospital                                                                 0.047054
+age_group_paper&gt;60                                                               1.085558
+age_group_paper30-60                                                             1.049817
+primary_diagnosis_groupDiabetes                                                  0.247909
+primary_diagnosis_groupDigestive                                                 0.441598
+primary_diagnosis_groupGenitourinary                                             0.555890
+primary_diagnosis_groupInjury                                                    0.536307
+primary_diagnosis_groupMusculoskeletal                                           0.556233
+primary_diagnosis_groupNeoplasms                                                 0.841050
+primary_diagnosis_groupOther                                                     0.310442
+primary_diagnosis_groupRespiratory                                               0.361577
+hba1c_groupHigh, medication not changed                                          0.271889
+hba1c_groupNo test                                                               0.167736
+hba1c_groupNormal                                                                0.293592
+discharge_homeOtherwise:raceAsian                                                0.758432
+discharge_homeOtherwise:raceCaucasian                                            0.137851
+discharge_homeOtherwise:raceHispanic                                             0.366376
+discharge_homeOtherwise:raceMissing                                              0.351625
+discharge_homeOtherwise:raceOther                                                0.498476
+discharge_homeOtherwise:medical_specialty_groupFamily/general practice           0.385385
+discharge_homeOtherwise:medical_specialty_groupInternal Medicine                 0.365820
+discharge_homeOtherwise:medical_specialty_groupMissing or unknown                0.347193
+discharge_homeOtherwise:medical_specialty_groupOther                             0.367605
+discharge_homeOtherwise:medical_specialty_groupSurgery                           0.409018
+discharge_homeOtherwise:primary_diagnosis_groupDiabetes                          0.162350
+discharge_homeOtherwise:primary_diagnosis_groupDigestive                         0.261352
+discharge_homeOtherwise:primary_diagnosis_groupGenitourinary                     0.339208
+discharge_homeOtherwise:primary_diagnosis_groupInjury                            0.271517
+discharge_homeOtherwise:primary_diagnosis_groupMusculoskeletal                   0.273465
+discharge_homeOtherwise:primary_diagnosis_groupNeoplasms                         0.397145
+discharge_homeOtherwise:primary_diagnosis_groupOther                             0.177105
+discharge_homeOtherwise:primary_diagnosis_groupRespiratory                       0.212018
+discharge_homeOtherwise:time_in_hospital                                         0.018807
+medical_specialty_groupFamily/general practice:time_in_hospital                  0.055775
+medical_specialty_groupInternal Medicine:time_in_hospital                        0.052414
+medical_specialty_groupMissing or unknown:time_in_hospital                       0.049461
+medical_specialty_groupOther:time_in_hospital                                    0.053048
+medical_specialty_groupSurgery:time_in_hospital                                  0.063673
+medical_specialty_groupFamily/general practice:age_group_paper&gt;60                1.309309
+medical_specialty_groupInternal Medicine:age_group_paper&gt;60                      1.144415
+medical_specialty_groupMissing or unknown:age_group_paper&gt;60                     1.098334
+medical_specialty_groupOther:age_group_paper&gt;60                                  1.126662
+medical_specialty_groupSurgery:age_group_paper&gt;60                                0.360097
+medical_specialty_groupFamily/general practice:age_group_paper30-60              1.281482
+medical_specialty_groupInternal Medicine:age_group_paper30-60                    1.111991
+medical_specialty_groupMissing or unknown:age_group_paper30-60                   1.063660
+medical_specialty_groupOther:age_group_paper30-60                                1.092497
+medical_specialty_groupSurgery:age_group_paper30-60                                    NA
+time_in_hospital:primary_diagnosis_groupDiabetes                                 0.026627
+time_in_hospital:primary_diagnosis_groupDigestive                                0.041196
+time_in_hospital:primary_diagnosis_groupGenitourinary                            0.057154
+time_in_hospital:primary_diagnosis_groupInjury                                   0.045992
+time_in_hospital:primary_diagnosis_groupMusculoskeletal                          0.050849
+time_in_hospital:primary_diagnosis_groupNeoplasms                                0.063794
+time_in_hospital:primary_diagnosis_groupOther                                    0.030689
+time_in_hospital:primary_diagnosis_groupRespiratory                              0.034152
+primary_diagnosis_groupDiabetes:hba1c_groupHigh, medication not changed          0.372588
+primary_diagnosis_groupDigestive:hba1c_groupHigh, medication not changed         0.741349
+primary_diagnosis_groupGenitourinary:hba1c_groupHigh, medication not changed     0.740583
+primary_diagnosis_groupInjury:hba1c_groupHigh, medication not changed            0.906494
+primary_diagnosis_groupMusculoskeletal:hba1c_groupHigh, medication not changed   0.906120
+primary_diagnosis_groupNeoplasms:hba1c_groupHigh, medication not changed         1.106814
+primary_diagnosis_groupOther:hba1c_groupHigh, medication not changed             0.422238
+primary_diagnosis_groupRespiratory:hba1c_groupHigh, medication not changed       0.481259
+primary_diagnosis_groupDiabetes:hba1c_groupNo test                               0.222109
+primary_diagnosis_groupDigestive:hba1c_groupNo test                              0.409599
+primary_diagnosis_groupGenitourinary:hba1c_groupNo test                          0.497083
+primary_diagnosis_groupInjury:hba1c_groupNo test                                 0.484515
+primary_diagnosis_groupMusculoskeletal:hba1c_groupNo test                        0.494150
+primary_diagnosis_groupNeoplasms:hba1c_groupNo test                              0.784373
+primary_diagnosis_groupOther:hba1c_groupNo test                                  0.282601
+primary_diagnosis_groupRespiratory:hba1c_groupNo test                            0.339508
+primary_diagnosis_groupDiabetes:hba1c_groupNormal                                0.388152
+primary_diagnosis_groupDigestive:hba1c_groupNormal                               0.695622
+primary_diagnosis_groupGenitourinary:hba1c_groupNormal                         174.428778
+primary_diagnosis_groupInjury:hba1c_groupNormal                                  0.810057
+primary_diagnosis_groupMusculoskeletal:hba1c_groupNormal                         0.760079
+primary_diagnosis_groupNeoplasms:hba1c_groupNormal                             250.515499
+primary_diagnosis_groupOther:hba1c_groupNormal                                   0.435746
+primary_diagnosis_groupRespiratory:hba1c_groupNormal                             0.583998
+                                                                               z value
+(Intercept)                                                                     -3.453
+discharge_homeOtherwise                                                          0.561
+raceAsian                                                                       -0.934
+raceCaucasian                                                                    0.016
+raceHispanic                                                                    -1.216
+raceMissing                                                                     -1.785
+raceOther                                                                       -1.359
+admission_source_groupOtherwise                                                 -0.227
+admission_source_groupPhysician/clinic referral                                  0.158
+medical_specialty_groupFamily/general practice                                   0.063
+medical_specialty_groupInternal Medicine                                         0.867
+medical_specialty_groupMissing or unknown                                        1.406
+medical_specialty_groupOther                                                     0.127
+medical_specialty_groupSurgery                                                   1.707
+time_in_hospital                                                                 2.844
+age_group_paper&gt;60                                                               0.672
+age_group_paper30-60                                                             0.608
+primary_diagnosis_groupDiabetes                                                 -0.976
+primary_diagnosis_groupDigestive                                                 0.039
+primary_diagnosis_groupGenitourinary                                            -0.714
+primary_diagnosis_groupInjury                                                   -0.261
+primary_diagnosis_groupMusculoskeletal                                          -1.276
+primary_diagnosis_groupNeoplasms                                                -0.077
+primary_diagnosis_groupOther                                                    -0.374
+primary_diagnosis_groupRespiratory                                              -2.214
+hba1c_groupHigh, medication not changed                                         -0.748
+hba1c_groupNo test                                                               0.299
+hba1c_groupNormal                                                                0.158
+discharge_homeOtherwise:raceAsian                                                1.082
+discharge_homeOtherwise:raceCaucasian                                            2.105
+discharge_homeOtherwise:raceHispanic                                             2.866
+discharge_homeOtherwise:raceMissing                                              2.762
+discharge_homeOtherwise:raceOther                                                0.286
+discharge_homeOtherwise:medical_specialty_groupFamily/general practice           0.379
+discharge_homeOtherwise:medical_specialty_groupInternal Medicine                 0.781
+discharge_homeOtherwise:medical_specialty_groupMissing or unknown                0.313
+discharge_homeOtherwise:medical_specialty_groupOther                             0.100
+discharge_homeOtherwise:medical_specialty_groupSurgery                           1.624
+discharge_homeOtherwise:primary_diagnosis_groupDiabetes                          0.751
+discharge_homeOtherwise:primary_diagnosis_groupDigestive                        -0.093
+discharge_homeOtherwise:primary_diagnosis_groupGenitourinary                    -0.605
+discharge_homeOtherwise:primary_diagnosis_groupInjury                            1.695
+discharge_homeOtherwise:primary_diagnosis_groupMusculoskeletal                   3.002
+discharge_homeOtherwise:primary_diagnosis_groupNeoplasms                        -1.264
+discharge_homeOtherwise:primary_diagnosis_groupOther                             1.963
+discharge_homeOtherwise:primary_diagnosis_groupRespiratory                       1.320
+discharge_homeOtherwise:time_in_hospital                                        -2.751
+medical_specialty_groupFamily/general practice:time_in_hospital                 -0.549
+medical_specialty_groupInternal Medicine:time_in_hospital                       -1.186
+medical_specialty_groupMissing or unknown:time_in_hospital                      -1.243
+medical_specialty_groupOther:time_in_hospital                                   -0.749
+medical_specialty_groupSurgery:time_in_hospital                                 -2.652
+medical_specialty_groupFamily/general practice:age_group_paper&gt;60                0.282
+medical_specialty_groupInternal Medicine:age_group_paper&gt;60                     -0.556
+medical_specialty_groupMissing or unknown:age_group_paper&gt;60                    -0.989
+medical_specialty_groupOther:age_group_paper&gt;60                                  0.145
+medical_specialty_groupSurgery:age_group_paper&gt;60                               -0.088
+medical_specialty_groupFamily/general practice:age_group_paper30-60              0.191
+medical_specialty_groupInternal Medicine:age_group_paper30-60                   -0.558
+medical_specialty_groupMissing or unknown:age_group_paper30-60                  -1.113
+medical_specialty_groupOther:age_group_paper30-60                                0.173
+medical_specialty_groupSurgery:age_group_paper30-60                                 NA
+time_in_hospital:primary_diagnosis_groupDiabetes                                 0.758
+time_in_hospital:primary_diagnosis_groupDigestive                                0.874
+time_in_hospital:primary_diagnosis_groupGenitourinary                            1.205
+time_in_hospital:primary_diagnosis_groupInjury                                  -0.629
+time_in_hospital:primary_diagnosis_groupMusculoskeletal                          1.017
+time_in_hospital:primary_diagnosis_groupNeoplasms                                0.152
+time_in_hospital:primary_diagnosis_groupOther                                   -2.287
+time_in_hospital:primary_diagnosis_groupRespiratory                              2.020
+primary_diagnosis_groupDiabetes:hba1c_groupHigh, medication not changed         -0.125
+primary_diagnosis_groupDigestive:hba1c_groupHigh, medication not changed        -1.339
+primary_diagnosis_groupGenitourinary:hba1c_groupHigh, medication not changed     0.602
+primary_diagnosis_groupInjury:hba1c_groupHigh, medication not changed            0.018
+primary_diagnosis_groupMusculoskeletal:hba1c_groupHigh, medication not changed  -0.282
+primary_diagnosis_groupNeoplasms:hba1c_groupHigh, medication not changed         0.819
+primary_diagnosis_groupOther:hba1c_groupHigh, medication not changed             2.053
+primary_diagnosis_groupRespiratory:hba1c_groupHigh, medication not changed       1.076
+primary_diagnosis_groupDiabetes:hba1c_groupNo test                               0.641
+primary_diagnosis_groupDigestive:hba1c_groupNo test                             -0.790
+primary_diagnosis_groupGenitourinary:hba1c_groupNo test                         -0.075
+primary_diagnosis_groupInjury:hba1c_groupNo test                                 0.285
+primary_diagnosis_groupMusculoskeletal:hba1c_groupNo test                       -0.564
+primary_diagnosis_groupNeoplasms:hba1c_groupNo test                             -0.125
+primary_diagnosis_groupOther:hba1c_groupNo test                                  0.605
+primary_diagnosis_groupRespiratory:hba1c_groupNo test                            0.179
+primary_diagnosis_groupDiabetes:hba1c_groupNormal                                0.314
+primary_diagnosis_groupDigestive:hba1c_groupNormal                              -0.764
+primary_diagnosis_groupGenitourinary:hba1c_groupNormal                          -0.071
+primary_diagnosis_groupInjury:hba1c_groupNormal                                 -0.291
+primary_diagnosis_groupMusculoskeletal:hba1c_groupNormal                        -0.081
+primary_diagnosis_groupNeoplasms:hba1c_groupNormal                              -0.049
+primary_diagnosis_groupOther:hba1c_groupNormal                                   1.230
+primary_diagnosis_groupRespiratory:hba1c_groupNormal                            -0.509
+                                                                               Pr(&gt;|z|)
+(Intercept)                                                                    0.000555
+discharge_homeOtherwise                                                        0.574458
+raceAsian                                                                      0.350063
+raceCaucasian                                                                  0.987362
+raceHispanic                                                                   0.224020
+raceMissing                                                                    0.074328
+raceOther                                                                      0.174130
+admission_source_groupOtherwise                                                0.820707
+admission_source_groupPhysician/clinic referral                                0.874510
+medical_specialty_groupFamily/general practice                                 0.949606
+medical_specialty_groupInternal Medicine                                       0.386018
+medical_specialty_groupMissing or unknown                                      0.159660
+medical_specialty_groupOther                                                   0.898594
+medical_specialty_groupSurgery                                                 0.087745
+time_in_hospital                                                               0.004455
+age_group_paper&gt;60                                                             0.501836
+age_group_paper30-60                                                           0.543059
+primary_diagnosis_groupDiabetes                                                0.328968
+primary_diagnosis_groupDigestive                                               0.968523
+primary_diagnosis_groupGenitourinary                                           0.475311
+primary_diagnosis_groupInjury                                                  0.794217
+primary_diagnosis_groupMusculoskeletal                                         0.202007
+primary_diagnosis_groupNeoplasms                                               0.938439
+primary_diagnosis_groupOther                                                   0.708110
+primary_diagnosis_groupRespiratory                                             0.026841
+hba1c_groupHigh, medication not changed                                        0.454482
+hba1c_groupNo test                                                             0.765313
+hba1c_groupNormal                                                              0.874420
+discharge_homeOtherwise:raceAsian                                              0.279417
+discharge_homeOtherwise:raceCaucasian                                          0.035307
+discharge_homeOtherwise:raceHispanic                                           0.004157
+discharge_homeOtherwise:raceMissing                                            0.005742
+discharge_homeOtherwise:raceOther                                              0.774763
+discharge_homeOtherwise:medical_specialty_groupFamily/general practice         0.704704
+discharge_homeOtherwise:medical_specialty_groupInternal Medicine               0.434963
+discharge_homeOtherwise:medical_specialty_groupMissing or unknown              0.754312
+discharge_homeOtherwise:medical_specialty_groupOther                           0.920231
+discharge_homeOtherwise:medical_specialty_groupSurgery                         0.104453
+discharge_homeOtherwise:primary_diagnosis_groupDiabetes                        0.452861
+discharge_homeOtherwise:primary_diagnosis_groupDigestive                       0.925531
+discharge_homeOtherwise:primary_diagnosis_groupGenitourinary                   0.545153
+discharge_homeOtherwise:primary_diagnosis_groupInjury                          0.090151
+discharge_homeOtherwise:primary_diagnosis_groupMusculoskeletal                 0.002683
+discharge_homeOtherwise:primary_diagnosis_groupNeoplasms                       0.206247
+discharge_homeOtherwise:primary_diagnosis_groupOther                           0.049669
+discharge_homeOtherwise:primary_diagnosis_groupRespiratory                     0.186726
+discharge_homeOtherwise:time_in_hospital                                       0.005940
+medical_specialty_groupFamily/general practice:time_in_hospital                0.582813
+medical_specialty_groupInternal Medicine:time_in_hospital                      0.235701
+medical_specialty_groupMissing or unknown:time_in_hospital                     0.213964
+medical_specialty_groupOther:time_in_hospital                                  0.454117
+medical_specialty_groupSurgery:time_in_hospital                                0.008010
+medical_specialty_groupFamily/general practice:age_group_paper&gt;60              0.777986
+medical_specialty_groupInternal Medicine:age_group_paper&gt;60                    0.578107
+medical_specialty_groupMissing or unknown:age_group_paper&gt;60                   0.322856
+medical_specialty_groupOther:age_group_paper&gt;60                                0.884794
+medical_specialty_groupSurgery:age_group_paper&gt;60                              0.930156
+medical_specialty_groupFamily/general practice:age_group_paper30-60            0.848307
+medical_specialty_groupInternal Medicine:age_group_paper30-60                  0.576809
+medical_specialty_groupMissing or unknown:age_group_paper30-60                 0.265741
+medical_specialty_groupOther:age_group_paper30-60                              0.862485
+medical_specialty_groupSurgery:age_group_paper30-60                                  NA
+time_in_hospital:primary_diagnosis_groupDiabetes                               0.448588
+time_in_hospital:primary_diagnosis_groupDigestive                              0.382384
+time_in_hospital:primary_diagnosis_groupGenitourinary                          0.228225
+time_in_hospital:primary_diagnosis_groupInjury                                 0.529287
+time_in_hospital:primary_diagnosis_groupMusculoskeletal                        0.309366
+time_in_hospital:primary_diagnosis_groupNeoplasms                              0.879459
+time_in_hospital:primary_diagnosis_groupOther                                  0.022178
+time_in_hospital:primary_diagnosis_groupRespiratory                            0.043335
+primary_diagnosis_groupDiabetes:hba1c_groupHigh, medication not changed        0.900612
+primary_diagnosis_groupDigestive:hba1c_groupHigh, medication not changed       0.180576
+primary_diagnosis_groupGenitourinary:hba1c_groupHigh, medication not changed   0.546970
+primary_diagnosis_groupInjury:hba1c_groupHigh, medication not changed          0.986011
+primary_diagnosis_groupMusculoskeletal:hba1c_groupHigh, medication not changed 0.778235
+primary_diagnosis_groupNeoplasms:hba1c_groupHigh, medication not changed       0.413017
+primary_diagnosis_groupOther:hba1c_groupHigh, medication not changed           0.040089
+primary_diagnosis_groupRespiratory:hba1c_groupHigh, medication not changed     0.281908
+primary_diagnosis_groupDiabetes:hba1c_groupNo test                             0.521269
+primary_diagnosis_groupDigestive:hba1c_groupNo test                            0.429248
+primary_diagnosis_groupGenitourinary:hba1c_groupNo test                        0.940502
+primary_diagnosis_groupInjury:hba1c_groupNo test                               0.775930
+primary_diagnosis_groupMusculoskeletal:hba1c_groupNo test                      0.572910
+primary_diagnosis_groupNeoplasms:hba1c_groupNo test                            0.900546
+primary_diagnosis_groupOther:hba1c_groupNo test                                0.545363
+primary_diagnosis_groupRespiratory:hba1c_groupNo test                          0.858006
+primary_diagnosis_groupDiabetes:hba1c_groupNormal                              0.753430
+primary_diagnosis_groupDigestive:hba1c_groupNormal                             0.444597
+primary_diagnosis_groupGenitourinary:hba1c_groupNormal                         0.943777
+primary_diagnosis_groupInjury:hba1c_groupNormal                                0.770705
+primary_diagnosis_groupMusculoskeletal:hba1c_groupNormal                       0.935591
+primary_diagnosis_groupNeoplasms:hba1c_groupNormal                             0.960643
+primary_diagnosis_groupOther:hba1c_groupNormal                                 0.218730
+primary_diagnosis_groupRespiratory:hba1c_groupNormal                           0.610433
+                                                                                  
+(Intercept)                                                                    ***
+discharge_homeOtherwise                                                           
+raceAsian                                                                         
+raceCaucasian                                                                     
+raceHispanic                                                                      
+raceMissing                                                                    .  
+raceOther                                                                         
+admission_source_groupOtherwise                                                   
+admission_source_groupPhysician/clinic referral                                   
+medical_specialty_groupFamily/general practice                                    
+medical_specialty_groupInternal Medicine                                          
+medical_specialty_groupMissing or unknown                                         
+medical_specialty_groupOther                                                      
+medical_specialty_groupSurgery                                                 .  
+time_in_hospital                                                               ** 
+age_group_paper&gt;60                                                                
+age_group_paper30-60                                                              
+primary_diagnosis_groupDiabetes                                                   
+primary_diagnosis_groupDigestive                                                  
+primary_diagnosis_groupGenitourinary                                              
+primary_diagnosis_groupInjury                                                     
+primary_diagnosis_groupMusculoskeletal                                            
+primary_diagnosis_groupNeoplasms                                                  
+primary_diagnosis_groupOther                                                      
+primary_diagnosis_groupRespiratory                                             *  
+hba1c_groupHigh, medication not changed                                           
+hba1c_groupNo test                                                                
+hba1c_groupNormal                                                                 
+discharge_homeOtherwise:raceAsian                                                 
+discharge_homeOtherwise:raceCaucasian                                          *  
+discharge_homeOtherwise:raceHispanic                                           ** 
+discharge_homeOtherwise:raceMissing                                            ** 
+discharge_homeOtherwise:raceOther                                                 
+discharge_homeOtherwise:medical_specialty_groupFamily/general practice            
+discharge_homeOtherwise:medical_specialty_groupInternal Medicine                  
+discharge_homeOtherwise:medical_specialty_groupMissing or unknown                 
+discharge_homeOtherwise:medical_specialty_groupOther                              
+discharge_homeOtherwise:medical_specialty_groupSurgery                            
+discharge_homeOtherwise:primary_diagnosis_groupDiabetes                           
+discharge_homeOtherwise:primary_diagnosis_groupDigestive                          
+discharge_homeOtherwise:primary_diagnosis_groupGenitourinary                      
+discharge_homeOtherwise:primary_diagnosis_groupInjury                          .  
+discharge_homeOtherwise:primary_diagnosis_groupMusculoskeletal                 ** 
+discharge_homeOtherwise:primary_diagnosis_groupNeoplasms                          
+discharge_homeOtherwise:primary_diagnosis_groupOther                           *  
+discharge_homeOtherwise:primary_diagnosis_groupRespiratory                        
+discharge_homeOtherwise:time_in_hospital                                       ** 
+medical_specialty_groupFamily/general practice:time_in_hospital                   
+medical_specialty_groupInternal Medicine:time_in_hospital                         
+medical_specialty_groupMissing or unknown:time_in_hospital                        
+medical_specialty_groupOther:time_in_hospital                                     
+medical_specialty_groupSurgery:time_in_hospital                                ** 
+medical_specialty_groupFamily/general practice:age_group_paper&gt;60                 
+medical_specialty_groupInternal Medicine:age_group_paper&gt;60                       
+medical_specialty_groupMissing or unknown:age_group_paper&gt;60                      
+medical_specialty_groupOther:age_group_paper&gt;60                                   
+medical_specialty_groupSurgery:age_group_paper&gt;60                                 
+medical_specialty_groupFamily/general practice:age_group_paper30-60               
+medical_specialty_groupInternal Medicine:age_group_paper30-60                     
+medical_specialty_groupMissing or unknown:age_group_paper30-60                    
+medical_specialty_groupOther:age_group_paper30-60                                 
+medical_specialty_groupSurgery:age_group_paper30-60                               
+time_in_hospital:primary_diagnosis_groupDiabetes                                  
+time_in_hospital:primary_diagnosis_groupDigestive                                 
+time_in_hospital:primary_diagnosis_groupGenitourinary                             
+time_in_hospital:primary_diagnosis_groupInjury                                    
+time_in_hospital:primary_diagnosis_groupMusculoskeletal                           
+time_in_hospital:primary_diagnosis_groupNeoplasms                                 
+time_in_hospital:primary_diagnosis_groupOther                                  *  
+time_in_hospital:primary_diagnosis_groupRespiratory                            *  
+primary_diagnosis_groupDiabetes:hba1c_groupHigh, medication not changed           
+primary_diagnosis_groupDigestive:hba1c_groupHigh, medication not changed          
+primary_diagnosis_groupGenitourinary:hba1c_groupHigh, medication not changed      
+primary_diagnosis_groupInjury:hba1c_groupHigh, medication not changed             
+primary_diagnosis_groupMusculoskeletal:hba1c_groupHigh, medication not changed    
+primary_diagnosis_groupNeoplasms:hba1c_groupHigh, medication not changed          
+primary_diagnosis_groupOther:hba1c_groupHigh, medication not changed           *  
+primary_diagnosis_groupRespiratory:hba1c_groupHigh, medication not changed        
+primary_diagnosis_groupDiabetes:hba1c_groupNo test                                
+primary_diagnosis_groupDigestive:hba1c_groupNo test                               
+primary_diagnosis_groupGenitourinary:hba1c_groupNo test                           
+primary_diagnosis_groupInjury:hba1c_groupNo test                                  
+primary_diagnosis_groupMusculoskeletal:hba1c_groupNo test                         
+primary_diagnosis_groupNeoplasms:hba1c_groupNo test                               
+primary_diagnosis_groupOther:hba1c_groupNo test                                   
+primary_diagnosis_groupRespiratory:hba1c_groupNo test                             
+primary_diagnosis_groupDiabetes:hba1c_groupNormal                                 
+primary_diagnosis_groupDigestive:hba1c_groupNormal                                
+primary_diagnosis_groupGenitourinary:hba1c_groupNormal                            
+primary_diagnosis_groupInjury:hba1c_groupNormal                                   
+primary_diagnosis_groupMusculoskeletal:hba1c_groupNormal                          
+primary_diagnosis_groupNeoplasms:hba1c_groupNormal                                
+primary_diagnosis_groupOther:hba1c_groupNormal                                    
+primary_diagnosis_groupRespiratory:hba1c_groupNormal                              
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 11305  on 19304  degrees of freedom
+Residual deviance: 10905  on 19212  degrees of freedom
+AIC: 11091
+
+Number of Fisher Scoring iterations: 13</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare HbA1c model vs interaction model</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(hba1c_logistic, interaction_model, <span class="at">test =</span> <span class="st">"Chisq"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Analysis of Deviance Table
+
+Model 1: readmitted_binary ~ discharge_home + race + admission_source_group + 
+    medical_specialty_group + time_in_hospital + age_group_paper + 
+    primary_diagnosis_group + hba1c_group
+Model 2: readmitted_binary ~ discharge_home + race + admission_source_group + 
+    medical_specialty_group + time_in_hospital + age_group_paper + 
+    primary_diagnosis_group + hba1c_group + discharge_home:race + 
+    discharge_home:medical_specialty_group + discharge_home:primary_diagnosis_group + 
+    discharge_home:time_in_hospital + medical_specialty_group:time_in_hospital + 
+    medical_specialty_group:age_group_paper + primary_diagnosis_group:time_in_hospital + 
+    primary_diagnosis_group:hba1c_group
+  Resid. Df Resid. Dev Df Deviance  Pr(&gt;Chi)    
+1     19277      11032                          
+2     19212      10905 65   126.61 7.474e-06 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># prediction on test set ----------------------------------------------------</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>test_data<span class="sc">$</span>prob_readmit <span class="ot">&lt;-</span> <span class="fu">predict</span>(</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  interaction_model,</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">newdata =</span> test_data,</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"response"</span></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in predict.lm(object, newdata, se.fit, scale = 1, type = if (type == :
+prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ROC / AUC ----------------------------------------------------------------</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>roc_obj <span class="ot">&lt;-</span> <span class="fu">roc</span>(</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">response =</span> test_data<span class="sc">$</span>readmitted_binary,</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">predictor =</span> test_data<span class="sc">$</span>prob_readmit,</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Not_Readmitted"</span>, <span class="st">"Readmitted"</span>)</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Setting direction: controls &lt; cases</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">auc</span>(roc_obj)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Area under the curve: 0.6234</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># choose threshold to prioritize recall/sensitivity, 70% sensitivity -------------------------</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>all_thresholds <span class="ot">&lt;-</span> <span class="fu">coords</span>(</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  roc_obj,</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> <span class="st">"all"</span>,</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">ret =</span> <span class="fu">c</span>(<span class="st">"threshold"</span>, <span class="st">"sensitivity"</span>, <span class="st">"specificity"</span>),</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">transpose =</span> <span class="cn">FALSE</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>all_thresholds <span class="ot">&lt;-</span> all_thresholds <span class="sc">%&gt;%</span></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(threshold)) <span class="sc">%&gt;%</span></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">diff_from_target =</span> <span class="fu">abs</span>(sensitivity <span class="sc">-</span> <span class="fl">0.70</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(diff_from_target)</span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>threshold_info <span class="ot">&lt;-</span> all_thresholds[<span class="dv">1</span>, ]</span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>threshold_info</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   threshold sensitivity specificity diff_from_target
+1 0.07183538   0.6995769   0.4697871     0.0004231312</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>threshold <span class="ot">&lt;-</span> threshold_info<span class="sc">$</span>threshold</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>threshold</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.07183538</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># classify using recall-focused threshold ----------------------------------</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>test_data<span class="sc">$</span>pred_class <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>  test_data<span class="sc">$</span>prob_readmit <span class="sc">&gt;=</span> threshold,</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Readmitted"</span>,</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Not_Readmitted"</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>test_data<span class="sc">$</span>pred_class <span class="ot">&lt;-</span> <span class="fu">factor</span>(</span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>  test_data<span class="sc">$</span>pred_class,</span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Not_Readmitted"</span>, <span class="st">"Readmitted"</span>)</span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="co"># model evaluation -----------------------------------------</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>cm <span class="ot">&lt;-</span> <span class="fu">confusionMatrix</span>(</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>  test_data<span class="sc">$</span>pred_class,</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>  test_data<span class="sc">$</span>readmitted_binary,</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">positive =</span> <span class="st">"Readmitted"</span></span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>cm</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Confusion Matrix and Statistics
+
+                Reference
+Prediction       Not_Readmitted Readmitted
+  Not_Readmitted           3553        213
+  Readmitted               4010        496
+                                          
+               Accuracy : 0.4895          
+                 95% CI : (0.4787, 0.5003)
+    No Information Rate : 0.9143          
+    P-Value [Acc &gt; NIR] : 1               
+                                          
+                  Kappa : 0.0494          
+                                          
+ Mcnemar's Test P-Value : &lt;2e-16          
+                                          
+            Sensitivity : 0.69958         
+            Specificity : 0.46979         
+         Pos Pred Value : 0.11008         
+         Neg Pred Value : 0.94344         
+             Prevalence : 0.08571         
+         Detection Rate : 0.05996         
+   Detection Prevalence : 0.54473         
+      Balanced Accuracy : 0.58468         
+                                          
+       'Positive' Class : Readmitted      
+                                          </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">auc</span>(roc_obj)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Area under the curve: 0.6234</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(roc_obj, <span class="at">main =</span> <span class="st">"ROC Curve: Logistic Regression"</span>)</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a =</span> <span class="dv">0</span>, <span class="at">b =</span> <span class="dv">1</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="project_files/figure-html/logistic_model%20evaluation-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The main logistic regression model was extended by adding HbA1c and interaction terms. These different models were then compared to each other. A likelihood ratio test showed that HbA1c did not significantly improve model fit (p=0.32). However, the interaction model significantly reduced deviance compared to the HbA1c model (p&lt;0.001), suggesting improved fit.</p>
+<p>Due to class imbalance (only ~8.6% of patients were readmitted), using a default classification threshold of 0.5 resulted in a model that failed to identify ny readmissions. To address this, we selected a lower threshold (~0.072) based on the ROC curve to achieve approximately 70% sensitivity.</p>
+<p>At this threshold, the cost of reduced specificity (~47%) and precision (~11%), reflected an increase in false positives. However, in a healthcare context, false negatives (missed readmissions) are more costly than false positives, making may deem this tradeoff appropriate. The model achieved an AUC of 0.623, indicating a modest predictive performance.</p>
+</section>
+</section>
 
 </main>
 <!-- /main column -->
