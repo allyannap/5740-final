@@ -9,7 +9,7 @@ Group Members:
 - JP Eliopoulos (jae257)
 - Cole Garcia (cgg38)
 - Allyanna Panganiban (amp388)
-- Sarah ()
+- Sarah Swee (sjs469)
 
 
 ```{r load packages}
