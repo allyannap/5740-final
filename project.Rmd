@@ -15,6 +15,7 @@ Group Members:
 ```{r load packages}
 # be sure to have installed the necessary packages prior to running this cell 
 # (see `README.md`)
+# install.packages("class", "caret")
 library(knitr)
 library(rmarkdown)
 library(tidyverse)
@@ -24,6 +25,7 @@ library(glmnet)
 library(caret)
 library(pROC)
 library(gam)
+library(class)   
 ```
 
 
@@ -451,5 +453,146 @@ gam2_test_error
 # This means that, in this case, using a GAM with a nonlinear term does not 
 # improve the model's prediction beyond logistic regression.
 
+```
 
+```{r}
+### KNN
+
+cluster_vars <- c(
+  "hba1c_group", "age_group_paper", "race", "gender",
+  "admission_source_group", "discharge_home",
+  "primary_diagnosis_group", "medical_specialty_group",
+  "time_in_hospital"
+)
+
+cat_vars <- setdiff(cluster_vars, "time_in_hospital")
+
+model_data <- diabetic_clean %>%
+  drop_na(all_of(cluster_vars)) %>%
+  drop_na(readmitted_binary) %>%
+  mutate(across(all_of(cat_vars), as.factor))
+
+# one-hot encode categorical variables
+encoded <- model.matrix(~ . - 1, data = model_data[, cat_vars])
+
+# scale all columns so no single variable dominates distance calculation
+# time_in_hospital would otherwise outweigh binary 0/1 columns
+X <- scale(cbind(encoded, time_in_hospital = model_data$time_in_hospital))
+y <- factor(model_data$readmitted_binary, levels = c(0, 1))
+
+cat("Readmission rate:", round(mean(model_data$readmitted_binary), 3), "\n")
+
+```
+
+```{r}
+# STEP 2: Split into train (70%), validation (15%), test (15%)
+#   Train: used to fit KNN
+#   Validation: used to pick the best k (k=1 through 20)
+#   Test: held out entirely until final evaluation — never seen during tuning
+    
+set.seed(42)
+n <- nrow(X)
+train_idx <- sample(n, size = floor(0.70 * n))
+remaining  <- setdiff(1:n, train_idx)
+val_idx    <- sample(remaining, size = floor(0.50 * length(remaining)))
+test_idx   <- setdiff(remaining, val_idx)
+
+X_train <- X[train_idx, ];  y_train <- y[train_idx]
+X_val   <- X[val_idx, ];    y_val   <- y[val_idx]
+X_test  <- X[test_idx, ];   y_test  <- y[test_idx]
+
+cat("Train:", length(train_idx), "| Validation:", length(val_idx), "| Test:", length(test_idx), "\n")
+```
+
+```{r}
+# STEP 3: Test k = 1 through 20 on validation set
+#   We use AUC rather than accuracy to pick k because readmission is imbalanced
+results <- data.frame(k = 1:20, accuracy = NA, sensitivity = NA, specificity = NA, auc = NA)
+
+for (k in 1:20) {
+  pred <- knn(X_train, X_val, cl = y_train, k = k, prob = TRUE)
+  prob_readmitted <- ifelse(pred == 1, attr(pred, "prob"), 1 - attr(pred, "prob"))
+  cm <- confusionMatrix(pred, y_val, positive = "1")
+  roc_obj <- roc(as.numeric(y_val) - 1, prob_readmitted, quiet = TRUE)
+  results$accuracy[k]    <- round(cm$overall["Accuracy"], 4)
+  results$sensitivity[k] <- round(cm$byClass["Sensitivity"], 4)
+  results$specificity[k] <- round(cm$byClass["Specificity"], 4)
+  results$auc[k]         <- round(auc(roc_obj), 4)
+}
+
+best_k <- results$k[which.max(results$auc)]
+cat("Best k:", best_k, "| AUC:", max(results$auc), "\n")
+```
+```{r}
+# pick best k by AUC
+best_k <- results$k[which.max(results$auc)]
+cat("\nBest k:", best_k, "| AUC:", max(results$auc), "\n")
+
+# plot k selection
+ggplot(results, aes(x = k)) +
+  geom_line(aes(y = auc, color = "AUC")) +
+  geom_line(aes(y = sensitivity, color = "Sensitivity")) +
+  geom_line(aes(y = specificity, color = "Specificity")) +
+  geom_vline(xintercept = best_k, linetype = "dashed", color = "black") +
+  annotate("text", x = best_k + 0.5, y = 0.5, label = paste("Best k =", best_k), hjust = 0) +
+  scale_color_manual(values = c("AUC" = "steelblue", "Sensitivity" = "tomato", "Specificity" = "seagreen")) +
+  labs(
+    title = "KNN Validation Performance Across k = 1 to 20",
+    subtitle = "Best k selected by highest AUC",
+    x = "k (number of neighbors)", y = "Score", color = "Metric"
+  ) +
+  theme_minimal()
+```
+```{r}
+# STEP 4: Fit final KNN with best k on test set
+#   Test set was never used during k selection — this is an unbiased estimate
+#   of how the model would perform on new, unseen patients
+
+final_pred <- knn(X_train, X_test, cl = y_train, k = best_k, prob = TRUE)
+final_probs <- ifelse(final_pred == 1, attr(final_pred, "prob"), 1 - attr(final_pred, "prob"))
+cm_final  <- confusionMatrix(final_pred, y_test, positive = "1")
+roc_final <- roc(as.numeric(y_test) - 1, final_probs, quiet = TRUE)
+cat("FINAL MODEL PERFORMANCE (Test Set) \n")
+cat("k =", best_k, "\n")
+cat("Accuracy:    ", round(cm_final$overall["Accuracy"], 4), "\n")
+cat("Sensitivity: ", round(cm_final$byClass["Sensitivity"], 4),
+    " ← % of readmitted patients correctly identified\n")
+cat("Specificity: ", round(cm_final$byClass["Specificity"], 4),
+    " - % of non-readmitted patients correctly cleared\n")
+cat("AUC:         ", round(auc(roc_final), 4),
+    " - overall discrimination (0.5 = random, 1.0 = perfect)\n")
+# confusion matrix heatmap
+conf_df <- as.data.frame(cm_final$table)
+colnames(conf_df) <- c("Predicted", "Actual", "Count")
+ggplot(conf_df, aes(x = Actual, y = Predicted, fill = Count)) +
+  geom_tile() +
+  geom_text(aes(label = Count), size = 7, fontface = "bold") +
+  scale_fill_gradient(low = "white", high = "steelblue") +
+  scale_x_discrete(labels = c("0" = "Not Readmitted", "1" = "Readmitted")) +
+  scale_y_discrete(labels = c("0" = "Not Readmitted", "1" = "Readmitted")) +
+  labs(
+    title = "Confusion Matrix — KNN Readmission Prediction",
+    subtitle = paste0("k = ", best_k,
+                      " | Accuracy: ", round(cm_final$overall["Accuracy"] * 100, 1), "%",
+                      " | AUC: ", round(auc(roc_final), 3))
+  ) +
+  theme_minimal()
+# ROC curve
+roc_df <- data.frame(
+  specificity = rev(roc_final$specificities),
+  sensitivity = rev(roc_final$sensitivities)
+)
+ggplot(roc_df, aes(x = 1 - specificity, y = sensitivity)) +
+  geom_line(color = "steelblue", linewidth = 1.2) +
+  geom_abline(linetype = "dashed", color = "gray50") +
+  annotate("text", x = 0.7, y = 0.2,
+           label = paste0("AUC = ", round(auc(roc_final), 3)),
+           size = 5, color = "steelblue") +
+  labs(
+    title = "ROC Curve — KNN Readmission Prediction",
+    subtitle = "Dashed line = random guessing (AUC = 0.5)",
+    x = "False Positive Rate (1 - Specificity)",
+    y = "True Positive Rate (Sensitivity)"
+  ) +
+  theme_minimal()
 ```
