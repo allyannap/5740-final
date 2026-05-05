@@ -421,6 +421,10 @@ that a lower threshold or alternative evaluation approach would improve model us
 
 ```{r }
 # Generalized Additive Model
+
+#Create a train and test set to evaluate the test error rate for each 
+# version of the gam
+
 set.seed(1)
 gam_model_data <- model_data
 gam_model_data$primary_diagnosis_group <- unname(gam_model_data$primary_diagnosis_group)
@@ -494,7 +498,29 @@ plot(gam1 ,se=T,col="green", main="Plot of time_in_hospital effect for Gam1")
 plot(gam2 ,se=T,col="red",main="Plot of time_in_hospital effect for Gam2")
 plot(gam3 ,se=T,col="lightblue",main="Plot of time_in_hospital effect for Gam3")
 
+#Plot the error rates of Gams with df = 0-10
+gam_test_error_vect <- c(rep(0,10))
+for (i in 0:10){
+  gami <- gam(readmitted_binary ~ s(time_in_hospital,df=i) +
+            hba1c_group + gender + age_group_paper + race + 
+            admission_source_group + discharge_home + primary_diagnosis_group +
+            medical_specialty_group, family=binomial, data=gam_model_data, 
+            subset=gam_train_index)
+  gami_probs <- predict(gam3, newdata=gam_test_data, type="response")
+  gami_preds <- ifelse(gam3_probs > 0.5, 1, 0)
+  gami_test_error <- mean(gam3_preds != gam_test_data$readmitted_binary)
+  gam_test_error_vect[i] <- gami_test_error
+}
 
+table(gam_test_error_vect)
+#gam_test_error_vect
+#0.0866674725009066 
+#                10 
+
+# Gams with df values 1-10 for the time_in_hospital effect all have the 
+# same test error rate, which further supports the notion that a 
+# nonlinear effect for time_in_hospital is not useful,
+# regardless of the number of knots
 
 
 ```
