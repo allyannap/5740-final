@@ -421,10 +421,23 @@ that a lower threshold or alternative evaluation approach would improve model us
 
 ```{r }
 # Generalized Additive Model
+set.seed(1)
+gam_model_data <- model_data
+gam_model_data$primary_diagnosis_group <- unname(gam_model_data$primary_diagnosis_group)
+
+
+gam_train_index <- createDataPartition(
+  gam_model_data$readmitted_binary,
+  p = 0.7,
+  list = FALSE
+)
+
+gam_train_data <- gam_model_data[gam_train_index, ]
+gam_test_data  <- gam_model_data[-gam_train_index, ]
 
 #First, make a gam with no nonlinear terms, trained only on the training data
-gam1 <- gam(readmitted_binary ~ ., family=binomial, data=model_data, 
-            subset=train_data)
+gam1 <- gam(readmitted_binary ~ ., family=binomial, data=gam_model_data, 
+            subset=gam_train_index)
 
 #Then, make a second gam
 #Here, we will have a nonlinear term only for time_in_hospital, trained only on
@@ -432,19 +445,19 @@ gam1 <- gam(readmitted_binary ~ ., family=binomial, data=model_data,
 gam2 <- gam(readmitted_binary ~ s(time_in_hospital,df=4) +
             hba1c_group + gender + age_group_paper + race + 
             admission_source_group + discharge_home + primary_diagnosis_group +
-            medical_specialty_group, family=binomial, data=model_data, 
-            subset=train_data)
+            medical_specialty_group, family=binomial, data=gam_model_data, 
+            subset=gam_train_index)
 
 #Calculate test error rates for gam1 and gam2
-gam1_probs <- predict(gam1, newdata=test_data, type="response")
+gam1_probs <- predict(gam1, newdata=gam_test_data, type="response")
 gam1_preds <- ifelse(gam1_probs > 0.5, 1, 0)
-gam1_test_error <- mean(gam1_preds != test_data$readmitted_binary)
+gam1_test_error <- mean(gam1_preds != gam_test_data$readmitted_binary)
 gam1_test_error
 # 0.08666747
 
-gam2_probs <- predict(gam2, newdata=test_data, type="response")
+gam2_probs <- predict(gam2, newdata=gam_test_data, type="response")
 gam2_preds <- ifelse(gam2_probs > 0.5, 1, 0)
-gam2_test_error <- mean(gam2_preds != test_data$readmitted_binary)
+gam2_test_error <- mean(gam2_preds != gam_test_data$readmitted_binary)
 gam2_test_error
 # 0.08666747
 
@@ -452,6 +465,37 @@ gam2_test_error
 # not affect the test error rate.
 # This means that, in this case, using a GAM with a nonlinear term does not 
 # improve the model's prediction beyond logistic regression.
+
+
+#Creating a third gam with 5 knots on the time_in_hospital nonlinear effect
+gam3 <- gam(readmitted_binary ~ s(time_in_hospital,df=5) +
+            hba1c_group + gender + age_group_paper + race + 
+            admission_source_group + discharge_home + primary_diagnosis_group +
+            medical_specialty_group, family=binomial, data=gam_model_data, 
+            subset=gam_train_index)
+
+
+gam3_probs <- predict(gam3, newdata=gam_test_data, type="response")
+gam3_preds <- ifelse(gam3_probs > 0.5, 1, 0)
+gam3_test_error <- mean(gam3_preds != gam_test_data$readmitted_binary)
+gam3_test_error
+#  0.08666747
+
+# Overall, these three gams all have the same test error rate, which
+# indicates that time_in_hospital likely has an approximately linear effect
+# so, giving it a nonlinear effect does not improve the test error rate of
+# the model, regardless of how many knots there are.
+
+#plotting the effect of time_in_hospital with and without nonlinear effects
+#time <- seq(min(gam_model_data$time_in_hospital), 
+ #           max(gam_model_data$time_in_hospital),
+#            length.out=200)
+plot(gam1 ,se=T,col="green", main="Plot of time_in_hospital effect for Gam1")
+plot(gam2 ,se=T,col="red",main="Plot of time_in_hospital effect for Gam2")
+plot(gam3 ,se=T,col="lightblue",main="Plot of time_in_hospital effect for Gam3")
+
+
+
 
 ```
 
