@@ -23,6 +23,7 @@ library(readr)
 library(glmnet)
 library(caret)
 library(pROC)
+library(gam)
 ```
 
 
@@ -413,3 +414,42 @@ while ridge retained all variables with shrinkage.
 
 In this context, missing readmissions is more costly than false positives, suggesting 
 that a lower threshold or alternative evaluation approach would improve model usefulness.
+
+## Generalized Additive Model
+
+```{r }
+# Generalized Additive Model
+
+#First, make a gam with no nonlinear terms, trained only on the training data
+gam1 <- gam(readmitted_binary ~ ., family=binomial, data=model_data, 
+            subset=train_data)
+
+#Then, make a second gam
+#Here, we will have a nonlinear term only for time_in_hospital, trained only on
+# training data
+gam2 <- gam(readmitted_binary ~ s(time_in_hospital,df=4) +
+            hba1c_group + gender + age_group_paper + race + 
+            admission_source_group + discharge_home + primary_diagnosis_group +
+            medical_specialty_group, family=binomial, data=model_data, 
+            subset=train_data)
+
+#Calculate test error rates for gam1 and gam2
+gam1_probs <- predict(gam1, newdata=test_data, type="response")
+gam1_preds <- ifelse(gam1_probs > 0.5, 1, 0)
+gam1_test_error <- mean(gam1_preds != test_data$readmitted_binary)
+gam1_test_error
+# 0.08666747
+
+gam2_probs <- predict(gam2, newdata=test_data, type="response")
+gam2_preds <- ifelse(gam2_probs > 0.5, 1, 0)
+gam2_test_error <- mean(gam2_preds != test_data$readmitted_binary)
+gam2_test_error
+# 0.08666747
+
+# This shows that adding a nonlinear effect for time_in_hospital variable does
+# not affect the test error rate.
+# This means that, in this case, using a GAM with a nonlinear term does not 
+# improve the model's prediction beyond logistic regression.
+
+
+```
